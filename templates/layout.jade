@@ -1,10 +1,13 @@
 doctype
 
+- var title = null
+block vars
+- if (title) { title = '— ' + title; }
+
 html(lang='en')
   head
     meta(charset='utf-8')
-    block title
-      title Jophy
-    link(rel='stylesheet', href='css/index.css')
+    title Jophy #{title}
+    link(rel='stylesheet', href='/css/index.css')
   body
     block content

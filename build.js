@@ -21,12 +21,12 @@ var markdown_options = {
 
 var sass_options = {
   outputDir: 'css'
-}
+};
 
 var asset_options = {
   src: 'images',
   dest: 'images'
-}
+};
 
 Metalsmith(__dirname)
   .use(watch())
@@ -35,7 +35,7 @@ Metalsmith(__dirname)
   .use(bind_template())
   .use(templates('jade'))
   .use(sass(sass_options))
-  .use(serve())
+  .use(serve({port: 3000}))
   .build(build_handler);
 
 function build_handler(error, files) {
@@ -48,8 +48,7 @@ function bind_template() {
   return function bt(files, metalsmith) {
     _.forEach(files, function(f, file_name) {
       if(path.extname(file_name) === '.html') {
-        path_array = file_name.split('/');
-        f.template = (path_array.length === 1 ? 'default' : path_array[0]) + '.jade'
+        f.template = (f.template || 'page') + '.jade';
       }
     });
   }

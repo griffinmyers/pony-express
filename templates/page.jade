@@ -1,11 +1,7 @@
-doctype
+extends ./layout.jade
 
-html(lang='en')
-  head
-    meta(charset='utf-8')
-    title= title
-    link(rel='stylesheet', href='stylesheets/main.css')
-  body
+block vars
+  - var title = locals.title
 
-    p!= contents
-    h1= date
+block content
+  != contents
