@@ -28,15 +28,26 @@ var asset_options = {
   dest: 'images'
 };
 
-Metalsmith(__dirname)
-  .use(watch())
+var is_dev = process.argv.length > 2 && process.argv[2] === 'dev' || false
+var is_script = !module.parent;
+
+var metalsmith = Metalsmith(__dirname)
   .use(asset(asset_options))
   .use(markdown(markdown_options))
   .use(bind_template())
   .use(templates('jade'))
   .use(sass(sass_options))
-  .use(serve({port: 3000}))
-  .build(build_handler);
+
+if(is_dev) {
+  metalsmith
+    .use(watch())
+    .use(serve({port: 3000}))
+    .build(build_handler);
+}
+
+if(is_script) {
+  build();
+}
 
 function build_handler(error, files) {
   if(error) {
@@ -58,3 +69,9 @@ function debug(files, metalsmith) {
   console.log(files);
   console.log(metalsmith);
 }
+
+function build() {
+  metalsmith.build(build_handler);
+}
+
+module.exports = build;
