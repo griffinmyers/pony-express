@@ -1,6 +1,8 @@
 # Portfolio
 
-A portfolio for Joph.
+A portfolio for Joph. 
+
+This will be a static website backed by Dropbox for easy editing with an automated build *in the cloud*. The `/src` directly will come from Dropbox. A Dropbox webhook will hit a little web server that'll kick off a `node build.js` and then copy `/build` to S3 for serving.
 
 #### building
 
