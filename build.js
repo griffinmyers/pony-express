@@ -38,7 +38,7 @@ var metalsmith = Metalsmith(__dirname)
   .use(templates('jade'))
   .use(sass(sass_options))
 
-if(is_dev) {
+if(is_dev && is_script) {
   metalsmith
     .use(watch())
     .use(serve({port: 3000}))
