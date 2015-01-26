@@ -1,7 +1,6 @@
 var _ = require('lodash');
 var Q = require('q');
 var path = require('path');
-
 var Metalsmith = require('metalsmith');
 var markdown = require('metalsmith-markdown');
 var templates = require('metalsmith-templates');
@@ -9,8 +8,8 @@ var serve = require('metalsmith-serve');
 var sass = require('metalsmith-sass');
 var watch = require('metalsmith-watch');
 var asset = require('metalsmith-static');
-
-var logger = require('lib').logger;
+var logger = require('./lib').logger;
+var config = require('./config');
 
 var markdown_options = {
   gfm: true,
@@ -35,6 +34,8 @@ var is_dev = process.argv.length > 2 && process.argv[2] === 'dev' || false
 var is_script = !module.parent;
 
 var metalsmith = Metalsmith(__dirname)
+  .source(config.source)
+  .destination(config.destination)
   .use(asset(asset_options))
   .use(markdown(markdown_options))
   .use(bind_template())

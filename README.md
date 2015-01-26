@@ -42,7 +42,7 @@ export AWS_SECRET_ACCESS_KEY='andigotthatgoodgirlfaithandatightlittleskirt'
 And huck those bits with the fury of an async runtime:
 
 ```javascript
-var Bucket = require('lib').Bucket;
+var Bucket = require('./lib').Bucket;
 
 var bucket = new Bucket('taylorswift.com');
 
@@ -51,12 +51,12 @@ bucket.sync('1989').catch(function(reason) {
 }).done();
 ```
 
-#### running the build/deploy server
+#### running the pull/build/deploy server
 
 ```bash
 node app.js
-curl -XPOST localhost:8080/build       # If you don't care if the build failed
-curl -XPOST localhost:8080/build_sync  # If you care if the build failed
+curl -XPOST localhost:8080/deploy       # If you don't care if the deploy failed
+curl -XPOST localhost:8080/deploy_sync  # If you care if the deploy failed
 ```
 
 #### adding a page
