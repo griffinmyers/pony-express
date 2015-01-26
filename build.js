@@ -1,4 +1,5 @@
 var _ = require('lodash');
+var Q = require('q');
 var path = require('path');
 
 var Metalsmith = require('metalsmith');
@@ -8,6 +9,8 @@ var serve = require('metalsmith-serve');
 var sass = require('metalsmith-sass');
 var watch = require('metalsmith-watch');
 var asset = require('metalsmith-static');
+
+var logger = require('./logger');
 
 var markdown_options = {
   gfm: true,
@@ -71,7 +74,10 @@ function debug(files, metalsmith) {
 }
 
 function build() {
-  metalsmith.build(build_handler);
+  return Q.ninvoke(metalsmith, 'build').catch(function(reason) {
+    logger.error(reason);
+    throw reason;
+  });
 }
 
 module.exports = build;

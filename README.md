@@ -24,6 +24,13 @@ var build = require('./build');
 build();
 ```
 
+#### running the build trigger server
+
+```bash
+node app.js
+curl -XPOST localhost:8080/build
+```
+
 #### adding a page
 
 ```markdown
