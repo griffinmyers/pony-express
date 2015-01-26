@@ -28,7 +28,8 @@ build();
 
 ```bash
 node app.js
-curl -XPOST localhost:8080/build
+curl -XPOST localhost:8080/build       # If you don't care if the build failed
+curl -XPOST localhost:8080/build_sync  # If you care if the build failed
 ```
 
 #### adding a page
