@@ -10,7 +10,7 @@ var port = process.env['PORT'] || 8080;
 app.use(morgan('dev', {stream: logger.stream}));
 
 app.post('/build', function(req, res) {
-  _.defer(build);
+  _.defer(function() { build().done(); });
   res.status(200).send('ok');
 });
 

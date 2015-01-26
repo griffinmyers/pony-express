@@ -44,7 +44,7 @@ var metalsmith = Metalsmith(__dirname)
 if(is_dev && is_script) {
   metalsmith
     .use(watch())
-    .use(serve({port: 3000}))
+    .use(serve({port: process.env['PORT'] || 3000}))
     .build(build_handler);
 }
 
@@ -59,6 +59,14 @@ function build_handler(error, files) {
 }
 
 function bind_template() {
+  //
+  // ## bind_template
+  //
+  // This middleware will add template metadata to any files that don't specify
+  // one. I don't want my buddy to have to know what 'jade' is or think much
+  // about templates unless he really wants to, so this is a reasonable default
+  // I think.
+  //
   return function bt(files, metalsmith) {
     _.forEach(files, function(f, file_name) {
       if(path.extname(file_name) === '.html') {
@@ -66,11 +74,6 @@ function bind_template() {
       }
     });
   }
-}
-
-function debug(files, metalsmith) {
-  console.log(files);
-  console.log(metalsmith);
 }
 
 function build() {
