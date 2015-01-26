@@ -25,7 +25,9 @@ or as a module
 ```javascript
 var build = require('./build');
 
-build();
+build().then(function() {
+  console.log('I bet that you look good on the dance floor');
+});
 ```
 
 #### running the build trigger server
