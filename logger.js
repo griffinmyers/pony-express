@@ -17,7 +17,7 @@ var logger = new (winston.Logger)({
 
 logger.stream = {
   write: function write(message, encoding) {
-    logger.info(message);
+    logger.info(message.slice(0, -1));
   }
 }
 

@@ -7,7 +7,7 @@ var build = require('./build');
 var app = express();
 var port = process.env['PORT'] || 8080;
 
-app.use(morgan('dev', {stream: logger.stream}));
+app.use(morgan('common', {stream: logger.stream}));
 
 app.post('/build', function(req, res) {
   _.defer(function() { build().done(); });
@@ -16,8 +16,10 @@ app.post('/build', function(req, res) {
 
 app.post('/build_sync', function(req, res) {
   build().then(function() {
+    logger.info('Build succeded.')
     res.status(200).send('Ok.');
   }, function(reason) {
+    logger.error('Build failed', reason);
     res.status(500).send('Build Failed.');
   }).done();
 });

@@ -77,12 +77,7 @@ function bind_template() {
 }
 
 function build() {
-  return Q.ninvoke(metalsmith, 'build').then(function() {
-    logger.info('Build completed');
-  }, function(reason) {
-    logger.error('Build failed', reason);
-    throw reason;
-  });
+  return Q.ninvoke(metalsmith, 'build');
 }
 
 module.exports = build;
