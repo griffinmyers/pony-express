@@ -1,3 +1,4 @@
+var _ = require('lodash');
 var express = require('express');
 var morgan = require('morgan')
 var logger = require('./logger');
@@ -9,11 +10,8 @@ var port = process.env['PORT'] || 8080;
 app.use(morgan('combined', {stream: logger.stream}));
 
 app.post('/build', function trigger(req, res) {
-  build().then(function() {
-    res.status(200).send('Ok.');
-  }, function(reason) {
-    res.status(500).send('Build Failed.');
-  }).done();
+  _.defer(build);
+  res.status(200).send('ok');
 });
 
 app.listen(port, function server() {

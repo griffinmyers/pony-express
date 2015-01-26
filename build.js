@@ -74,8 +74,10 @@ function debug(files, metalsmith) {
 }
 
 function build() {
-  return Q.ninvoke(metalsmith, 'build').catch(function(reason) {
-    logger.error(reason);
+  return Q.ninvoke(metalsmith, 'build').then(function() {
+    logger.info('Build completed');
+  }, function(reason) {
+    logger.error('Build failed', reason);
     throw reason;
   });
 }
