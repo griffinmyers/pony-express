@@ -2,7 +2,7 @@
 
 A portfolio for my good friend and copywriter Joph.
 
-This will be a static website backed by Dropbox for easy editing with an automated build *in the cloud*. The `/src` directly will come from Dropbox. A Dropbox webhook will hit a little web server that'll kick off a `node build.js` and then copy `/build` to S3 for serving. So to recap:
+This will be a static website backed by Dropbox for easy editing with an automated build *in the cloud*. The `/src` directly will come from Dropbox. A Dropbox webhook will hit a little web server that'll kick off a build and then copy `/build` to S3 for serving. So to recap:
 
 * easy editing
 * the cheapest to host
