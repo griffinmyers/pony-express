@@ -30,7 +30,26 @@ build().then(function() {
 });
 ```
 
-#### running the build trigger server
+#### deploying
+
+Set up your env:
+
+```bash
+export AWS_ACCESS_KEY_ID='yougotthatlonghairslickedbackwhitetshirt'
+export AWS_SECRET_ACCESS_KEY='andigotthatgoodgirlfaithandatightlittleskirt'
+```
+
+And huck those bits with the fury of an async runtime:
+
+```javascript
+var bucket = new S3Bucket('taylorswift.com');
+
+bucket.sync('1989').catch(function(reason) {
+  logger.error('...and now weve got bad blood');
+}).done();
+```
+
+#### running the build/deploy server
 
 ```bash
 node app.js
