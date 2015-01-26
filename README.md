@@ -42,7 +42,7 @@ export AWS_SECRET_ACCESS_KEY='andigotthatgoodgirlfaithandatightlittleskirt'
 And huck those bits with the fury of an async runtime:
 
 ```javascript
-var S3Bucket = require('./s3_bucket');
+var S3Bucket = require('lib').S3Bucket;
 
 var bucket = new S3Bucket('taylorswift.com');
 

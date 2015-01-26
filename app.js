@@ -1,7 +1,7 @@
 var _ = require('lodash');
 var express = require('express');
 var morgan = require('morgan')
-var logger = require('./logger');
+var logger = require('lib').logger;
 var build = require('./build');
 
 var app = express();

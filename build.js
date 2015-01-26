@@ -10,7 +10,7 @@ var sass = require('metalsmith-sass');
 var watch = require('metalsmith-watch');
 var asset = require('metalsmith-static');
 
-var logger = require('./logger');
+var logger = require('lib').logger;
 
 var markdown_options = {
   gfm: true,
