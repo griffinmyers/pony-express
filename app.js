@@ -19,7 +19,7 @@ app.post('/deploy_sync', function(req, res) {
     res.status(200).send('Ok.');
   }, function(reason) {
     logger.error('Deploy failed', reason);
-    res.status(500).send('Build Failed.');
+    res.status(500).send('Deploy Failed.');
   }).done();
 });
 
