@@ -1,4 +1,3 @@
-var _ = require('lodash');
 var express = require('express');
 var morgan = require('morgan')
 var logger = require('./lib').logger;
@@ -10,12 +9,7 @@ var port = process.env['PORT'] || 8080;
 app.use(morgan('common', {stream: logger.stream}));
 
 app.post('/deploy', function(req, res) {
-  _.defer(function() {
-    deploy().catch(function(reason) {
-      logger.error('Deploy failed', reason);
-    });
-  });
-
+  process.nextTick(deploy);
   res.status(200).send('ok');
 });
 
@@ -23,7 +17,6 @@ app.post('/deploy_sync', function(req, res) {
   deploy().then(function() {
     res.status(200).send('Ok.');
   }, function(reason) {
-    logger.error('Deploy failed', reason);
     res.status(500).send('Deploy Failed.');
   }).done();
 });
