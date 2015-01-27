@@ -10,7 +10,12 @@ var port = process.env['PORT'] || 8080;
 app.use(morgan('common', {stream: logger.stream}));
 
 app.post('/deploy', function(req, res) {
-  _.defer(function() { deploy().done(); });
+  _.defer(function() {
+    deploy().catch(function(reason) {
+      logger.error('Deploy failed', reason);
+    });
+  });
+
   res.status(200).send('ok');
 });
 

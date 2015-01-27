@@ -4,9 +4,9 @@
   "description": "A portfolio for Joph",
   "repository": "https://github.com/griffinmyers/portfolio",
   "dependencies": {
-    "aws-sdk": "^2.1.7",
+    "aws-sdk": "2.1.7",
     "express": "4.11.1",
-    "glob": "^4.3.5",
+    "glob": "4.3.5",
     "jade": "1.9.1",
     "lodash": "2.4.1",
     "metalsmith": "1.0.1",
@@ -14,7 +14,7 @@
     "metalsmith-sass": "0.5.0",
     "metalsmith-static": "0.0.5",
     "metalsmith-templates": "0.6.0",
-    "mime": "^1.2.11",
+    "mime": "1.2.11",
     "morgan": "1.5.1",
     "q": "1.1.2",
     "winston": "0.8.3"
