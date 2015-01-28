@@ -8,6 +8,26 @@ This will be a static website backed by Dropbox for easy editing with an automat
 * the cheapest to host
 * the fastest response times
 
+#### fetching
+
+Set up your env:
+
+```bash
+export DROPBOX_ACCESS_KEY='iknewyouweretroublewhenyouwalkedin'
+```
+
+And huck those bits with the fury of an async runtime:
+
+```javascript
+var Dropbox = require('./lib').Dropbox;
+
+var dropbox = new Dropbox('remote_dir');
+
+dropbox.save(local_dir).then(function(result) {
+  logger.info('...dancing to electro pop like a robot from 1984');
+}).done();
+```
+
 #### building
 
 ```bash
@@ -37,6 +57,7 @@ Set up your env:
 ```bash
 export AWS_ACCESS_KEY_ID='yougotthatlonghairslickedbackwhitetshirt'
 export AWS_SECRET_ACCESS_KEY='andigotthatgoodgirlfaithandatightlittleskirt'
+export DROPBOX_ACCESS_KEY='iknewyouweretroublewhenyouwalkedin'
 ```
 
 And huck those bits with the fury of an async runtime:

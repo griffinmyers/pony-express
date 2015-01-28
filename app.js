@@ -1,8 +1,8 @@
 var express = require('express');
 var morgan = require('morgan')
 var logger = require('./lib').logger;
-var deploy = require('./lib').deploy;
-
+var config = require('./config');
+var deploy = require('./lib').deploy(config.dropbox, config.source, config.destination, config.bucket);
 var app = express();
 var port = process.env['PORT'] || 8080;
 

@@ -1,5 +1,6 @@
 module.exports = {
   bucket: 'joeshaner.com',
   destination: 'build',
-  source: 'src'
+  source: 'src',
+  dropbox: 'portfolio'
 };
