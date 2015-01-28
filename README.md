@@ -16,14 +16,12 @@ Set up your env:
 export DROPBOX_ACCESS_KEY='iknewyouweretroublewhenyouwalkedin'
 ```
 
-And huck those bits with the fury of an async runtime:
-
 ```javascript
 var Dropbox = require('./lib').Dropbox;
 
 var dropbox = new Dropbox('remote_dir');
 
-dropbox.save(local_dir).then(function(result) {
+dropbox.save('local_dir').then(function(result) {
   logger.info('...dancing to electro pop like a robot from 1984');
 }).done();
 ```
