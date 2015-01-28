@@ -69,9 +69,9 @@ function bind_template() {
   // I think.
   //
   return function bt(files, metalsmith) {
-    _.forEach(files, function(f, file_name) {
+    _.forEach(files, function(file, file_name) {
       if(path.extname(file_name) === '.html') {
-        f.template = (f.template || 'page') + '.jade';
+        file.template = (file.template || 'page') + '.jade';
       }
     });
   }
