@@ -1,9 +1,8 @@
-var express = require('express');
+var app = require('express')();
 var morgan = require('morgan')
 var logger = require('./lib').logger;
 var config = require('./config');
 var deploy = require('./lib').deploy(config.dropbox, config.source, config.destination, config.bucket);
-var app = express();
 var port = process.env['PORT'] || 8080;
 
 app.use(morgan('common', {stream: logger.stream}));
