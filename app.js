@@ -3,7 +3,6 @@ var morgan = require('morgan')
 var logger = require('./lib').logger;
 var config = require('./config');
 var deploy = require('./lib').deploy(config.dropbox, config.source, config.destination, config.bucket);
-var port = process.env['PORT'] || 8080;
 
 app.use(morgan('common', {stream: logger.stream}));
 
@@ -20,6 +19,6 @@ app.post('/deploy_sync', function(req, res) {
   }).done();
 });
 
-app.listen(port, function server() {
-  logger.info('node server listening on', port);
+app.listen(config.port, function server() {
+  logger.info('node server listening on', config.port);
 });

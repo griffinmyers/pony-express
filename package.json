@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "A portfolio for Joph",
   "repository": "https://github.com/griffinmyers/portfolio",
+  "scripts": {
+    "start": "node app.js"
+  }
   "dependencies": {
     "aws-sdk": "2.1.7",
     "express": "4.11.1",
