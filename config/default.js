@@ -1,5 +1,5 @@
 module.exports = {
-  port: process.env.port || 8080,
+  port: 1296,
   bucket: 'joeshaner.com',
   destination: 'build',
   source: 'src',
