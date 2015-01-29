@@ -4,9 +4,7 @@ var path = require('path');
 var Metalsmith = require('metalsmith');
 var markdown = require('metalsmith-markdown');
 var templates = require('metalsmith-templates');
-var serve = require('metalsmith-serve');
 var sass = require('metalsmith-sass');
-var watch = require('metalsmith-watch');
 var asset = require('metalsmith-static');
 var logger = require('./lib').logger;
 var config = require('./config');
@@ -44,6 +42,9 @@ function metalsmith(source, destination) {
     .use(sass(sass_options))
 
   if(is_dev && is_script) {
+    var serve = require('metalsmith-serve');
+    var watch = require('metalsmith-watch');
+
     smith
       .use(watch())
       .use(serve({port: process.env['PORT'] || 3000}))
