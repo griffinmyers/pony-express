@@ -17,7 +17,7 @@ app.post('/deploy', function(req, res) {
 
 app.post('/deploy_sync', function(req, res) {
   deploy().then(function() {
-    res.status(200).send('Ok.');
+    res.status(200).send('ok.');
   }, function(reason) {
     res.status(500).send('Deploy Failed.');
   }).done();
