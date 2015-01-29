@@ -11,52 +11,46 @@ var asset = require('metalsmith-static');
 var logger = require('./lib').logger;
 var config = require('./config');
 
-var markdown_options = {
-  gfm: true,
-  tables: true,
-  breaks: false,
-  pedantic: false,
-  sanitize: true,
-  smartLists: true,
-  smartypants: true
-};
-
-var sass_options = {
-  outputDir: 'css'
-};
-
-var asset_options = {
-  src: 'images',
-  dest: 'images'
-};
-
 var is_dev = process.argv.length > 2 && process.argv[2] === 'dev' || false
 var is_script = !module.parent;
 
-var metalsmith = Metalsmith(__dirname)
-  .source(config.source)
-  .destination(config.destination)
-  .use(asset(asset_options))
-  .use(markdown(markdown_options))
-  .use(bind_template())
-  .use(templates('jade'))
-  .use(sass(sass_options))
+function metalsmith(source, destination) {
+  var markdown_options = {
+    gfm: true,
+    tables: true,
+    breaks: false,
+    pedantic: false,
+    sanitize: true,
+    smartLists: true,
+    smartypants: true
+  };
 
-if(is_dev && is_script) {
-  metalsmith
-    .use(watch())
-    .use(serve({port: process.env['PORT'] || 3000}))
-    .build(build_handler);
-}
+  var sass_options = {
+    outputDir: 'css'
+  };
 
-if(is_script) {
-  build();
-}
+  var asset_options = {
+    src: 'images',
+    dest: 'images'
+  };
 
-function build_handler(error, files) {
-  if(error) {
-    throw error;
+  var smith = Metalsmith(__dirname)
+    .source(source)
+    .destination(destination)
+    .use(asset(asset_options))
+    .use(markdown(markdown_options))
+    .use(bind_template())
+    .use(templates('jade'))
+    .use(sass(sass_options))
+
+  if(is_dev && is_script) {
+    smith
+      .use(watch())
+      .use(serve({port: process.env['PORT'] || 3000}))
+      .build(function(e, files){ if(e) { throw e; } });
   }
+
+  return smith;
 }
 
 function bind_template() {
@@ -77,8 +71,12 @@ function bind_template() {
   }
 }
 
-function build() {
-  return Q.ninvoke(metalsmith, 'build');
+function build(source, destination) {
+  return Q.ninvoke(metalsmith(source, destination), 'build');
+}
+
+if(is_script) {
+  build(config.source, config.destination).done();
 }
 
 module.exports = build;
