@@ -43,9 +43,9 @@ or as a module
 ```javascript
 var build = require('./build');
 
-build().then(function() {
+build('src', 'build').then(function() {
   console.log('I bet that you look good on the dance floor');
-});
+}).done();
 ```
 
 #### deploying
