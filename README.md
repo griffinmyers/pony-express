@@ -65,7 +65,7 @@ var Bucket = require('./lib').Bucket;
 
 var bucket = new Bucket('taylorswift.com');
 
-bucket.sync('1989').catch(function(reason) {
+bucket.push('1989').catch(function(reason) {
   logger.error('...and now weve got bad blood');
 }).done();
 ```
