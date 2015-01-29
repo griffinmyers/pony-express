@@ -5,7 +5,7 @@
   "repository": "https://github.com/griffinmyers/portfolio",
   "scripts": {
     "start": "node app.js"
-  }
+  },
   "dependencies": {
     "aws-sdk": "2.1.7",
     "express": "4.11.1",
