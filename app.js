@@ -19,7 +19,7 @@ app.post('/deploy', bodyParser.raw({type: '*'}), function(req, res) {
   var signature = req.header('X-Dropbox-Signature');
   logger.info('Signature', signature);
   var hmac = crypto.createHmac('sha256', process.env.DROPBOX_SECRET).update(req.body);
-  logger.info('Hmac', Hmac);
+  logger.info('Hmac', hmac);
 
   if(!signature || signature !== hmac.digest('hex')) {
     logger.error('Invalid Signature.');
