@@ -3,6 +3,7 @@ var app = require('express')();
 var bodyParser = require('body-parser');
 var morgan = require('morgan');
 var logger = require('./lib').logger;
+var verify = require('./lib').verify;
 var config = require('./config');
 var deploy = require('./lib').deploy(config.dropbox, config.source, config.destination, config.bucket);
 
@@ -13,22 +14,10 @@ app.get('/deploy', function(req, res) {
   res.send(req.query.challenge);
 });
 
-app.post('/deploy', bodyParser.raw({type: '*'}), function(req, res) {
+app.post('/deploy', bodyParser.json({verify: verify}), function(req, res) {
   logger.info('Webhook received with', req.body);
-
-  var signature = req.header('X-Dropbox-Signature');
-  logger.info('Signature', signature);
-  var hmac = crypto.createHmac('sha256', process.env.DROPBOX_SECRET).update(req.body);
-  logger.info('Hmac', hmac);
-
-  if(!signature || signature !== hmac.digest('hex')) {
-    logger.error('Invalid Signature.');
-    res.status(403).end();
-  }
-  else {
-    process.nextTick(deploy);
-    res.send(200).send('ok');
-  }
+  process.nextTick(deploy);
+  res.status(200).send('ok');
 });
 
 app.post('/deploy_sync', function(req, res) {
