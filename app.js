@@ -1,18 +1,33 @@
+var crypto = require('crypto');
 var app = require('express')();
-var morgan = require('morgan')
+var bodyParser = require('body-parser');
+var morgan = require('morgan');
 var logger = require('./lib').logger;
 var config = require('./config');
 var deploy = require('./lib').deploy(config.dropbox, config.source, config.destination, config.bucket);
 
+app.use(bodyParser.json());
 app.use(morgan('common', {stream: logger.stream}));
 
-app.get('/webhook', function(req, res) {
+app.get('/deploy', function(req, res) {
+  logger.info('Dropbox Webhook challenge "%s" received & echoed.', req.query.challenge);
   res.send(req.query.challenge);
 });
 
 app.post('/deploy', function(req, res) {
-  process.nextTick(deploy);
-  res.status(200).send('ok');
+  logger.info('Webhook received with', req.body);
+
+  var signature = req.header('X-Dropbox-Signature');
+  var hmac = crypto.createHmac('sha256', process.env.DROPBOX_SECRET).update(JSON.stringify(req.body));
+
+  if(!signature || signature !== hmac.digest('hex')) {
+    logger.error('Invalid Signature.');
+    res.status(403).end();
+  }
+  else {
+    process.nextTick(deploy);
+    res.send(200).send('ok');
+  }
 });
 
 app.post('/deploy_sync', function(req, res) {
