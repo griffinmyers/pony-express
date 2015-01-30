@@ -6,6 +6,10 @@ var deploy = require('./lib').deploy(config.dropbox, config.source, config.desti
 
 app.use(morgan('common', {stream: logger.stream}));
 
+app.get('/webhook', function(req, res) {
+  res.send(req.query.challenge);
+});
+
 app.post('/deploy', function(req, res) {
   process.nextTick(deploy);
   res.status(200).send('ok');
