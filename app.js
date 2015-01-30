@@ -9,7 +9,6 @@ var deploy = require('./lib').deploy(config.dropbox, config.source, config.desti
 app.use(morgan('common', {stream: logger.stream}));
 
 app.get('/deploy', function(req, res) {
-  logger.info('Dropbox Webhook challenge "%s" received & echoed.', req.query.challenge);
   res.send(req.query.challenge);
 });
 
