@@ -6,10 +6,6 @@ var deploy = require('./lib').deploy(config.dropbox, config.source, config.desti
 
 app.use(morgan('common', {stream: logger.stream}));
 
-app.get('/health', function(req, res) {
-  res.send('ok');
-});
-
 app.post('/deploy', function(req, res) {
   process.nextTick(deploy);
   res.status(200).send('ok');
