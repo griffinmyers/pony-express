@@ -6,7 +6,6 @@ var logger = require('./lib').logger;
 var config = require('./config');
 var deploy = require('./lib').deploy(config.dropbox, config.source, config.destination, config.bucket);
 
-app.use(bodyParser.json());
 app.use(morgan('common', {stream: logger.stream}));
 
 app.get('/deploy', function(req, res) {
@@ -14,11 +13,13 @@ app.get('/deploy', function(req, res) {
   res.send(req.query.challenge);
 });
 
-app.post('/deploy', function(req, res) {
+app.post('/deploy', bodyParser.raw({type: '*'}), function(req, res) {
   logger.info('Webhook received with', req.body);
 
   var signature = req.header('X-Dropbox-Signature');
-  var hmac = crypto.createHmac('sha256', process.env.DROPBOX_SECRET).update(JSON.stringify(req.body));
+  logger.info('Signature', signature);
+  var hmac = crypto.createHmac('sha256', process.env.DROPBOX_SECRET).update(req.body);
+  logger.info('Hmac', Hmac);
 
   if(!signature || signature !== hmac.digest('hex')) {
     logger.error('Invalid Signature.');
