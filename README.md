@@ -55,7 +55,6 @@ Set up your env:
 ```bash
 export AWS_ACCESS_KEY_ID='yougotthatlonghairslickedbackwhitetshirt'
 export AWS_SECRET_ACCESS_KEY='andigotthatgoodgirlfaithandatightlittleskirt'
-export DROPBOX_ACCESS_KEY='iknewyouweretroublewhenyouwalkedin'
 ```
 
 And huck those bits with the fury of an async runtime:
