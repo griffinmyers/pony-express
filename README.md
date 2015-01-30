@@ -73,8 +73,7 @@ bucket.push('1989').catch(function(reason) {
 
 ```bash
 node app.js
-curl -XPOST localhost:8080/deploy       # If you don't care if the deploy failed
-curl -XPOST localhost:8080/deploy_sync  # If you care if the deploy failed
+curl -XPOST localhost:8080/deploy_sync
 ```
 
 #### adding a page
