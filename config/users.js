@@ -1,6 +1,5 @@
 module.exports = {
   544017: {
-    bucket: 'joeshaner.com',
-    dropbox: 'portfolio'
+    bucket: 'joeshaner.com'
   }
 };

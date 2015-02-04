@@ -17,9 +17,7 @@ export DROPBOX_ACCESS_KEY='iknewyouweretroublewhenyouwalkedin'
 ```
 
 ```javascript
-var Dropbox = require('./lib').Dropbox;
-
-var dropbox = new Dropbox('remote_dir');
+var dropbox = require('./lib').dropbox;
 
 dropbox.save('local_dir').then(function(result) {
   logger.info('...dancing to electro pop like a robot from 1984');
