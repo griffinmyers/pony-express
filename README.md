@@ -94,3 +94,11 @@ Options for metadata are:
 #### Markdown overview
 
 [Markdown syntax](http://daringfireball.net/projects/markdown/syntax)
+
+#### Oauth2.0, until I decide to implement a little site on top of this:
+
+User goes to `https://www.dropbox.com/1/oauth2/authorize?client_id=KEY&response_type=code`, copies you the code.
+
+```bash
+curl -XPOST "https://api.dropbox.com/1/oauth2/token" -H 'application/x-www-form-urlencoded'  -d 'client_id=KEY&client_secret=SECRET9&code=CODE&grant_type=authorization_code'
+```
