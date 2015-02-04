@@ -43,10 +43,10 @@ module.exports = {
       }
     }).then(function(result){
       // save to s3 => {result.uid: result.access_token}
-      logger.info('Sucessfully authorized ', result.uid);
+      logger.info('Authorization Succeeded, UID', result.uid);
       res.send('ok computer')
     }, function(reason) {
-      logger.error('Authorization failed', reason.message);
+      logger.error('Authorization Failed', reason.message);
       res.send('borked')
     }).done();
   }
