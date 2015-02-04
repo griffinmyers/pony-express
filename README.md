@@ -8,12 +8,17 @@ This will be a static website backed by Dropbox for easy editing with an automat
 * the cheapest to host
 * the fastest response times
 
+#### authorizing
+
+`GET /authorize`
+
 #### fetching
 
 Set up your env:
 
 ```bash
-export DROPBOX_ACCESS_KEY='iknewyouweretroublewhenyouwalkedin'
+export DROPBOX_APP_KEY=iknewyouweretroublewhenyouwalkedin
+export DROPBOX_APP_SECRET=whyyougottabesomean
 ```
 
 ```javascript
