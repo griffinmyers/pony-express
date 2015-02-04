@@ -2,9 +2,9 @@ var _ = require('lodash');
 var app = require('express')();
 var bodyParser = require('body-parser');
 var morgan = require('morgan');
+var config = require('./config');
 var logger = require('./lib').logger;
 var verify = require('./lib').verify;
-var config = require('./config');
 var deploy = require('./lib').deploy;
 
 app.use(morgan('common', {stream: logger.stream}));
