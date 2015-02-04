@@ -1,6 +1,7 @@
 var url = require('url')
 var request = require('request');
 var Q = require('Q');
+var config = root_require('config');
 var logger = root_require('lib').logger;
 
 module.exports = {
@@ -12,7 +13,7 @@ module.exports = {
       query: {
         client_id: process.env.DROPBOX_APP_KEY,
         response_type: 'code',
-        redirect_uri: 'http://localhost:3000/authorize/redirect'
+        redirect_uri: config.redirect_uri
       }
     }));
   },
@@ -29,7 +30,7 @@ module.exports = {
         client_secret: process.env.DROPBOX_APP_SECRET,
         code: req.query.code,
         grant_type: 'authorization_code',
-        redirect_uri: 'http://localhost:3000/authorize/redirect'
+        redirect_uri: config.redirect_uri
       }
     }).spread(function(response, body) {
       var result = JSON.parse(body);
