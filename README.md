@@ -1,16 +1,25 @@
-# Portfolio
+# Pony Express
 
-A portfolio for my good friend and copywriter Joph.
-
-This will be a static website backed by Dropbox for easy editing with an automated build *in the cloud*. The `/src` directory will come from Dropbox. A Dropbox webhook will hit a little web server that'll kick off a build and then copy `/build` to S3 for serving. So to recap:
+A build server for building & deploying static websites backed by dropbox. A Dropbox webhook will hit this little web server whenver something changes and kick off a build/deploy of the site to S3 for serving. So to recap:
 
 * easy editing
 * the cheapest to host
 * the fastest response times
 
+### Running
+
+```bash
+node app.js
+curl -XPOST localhost:8080/deploy
+```
+
+### The Process (by component)
+
 #### authorizing
 
 `GET /authorize`
+
+This will link the users' dropbox up with pony express. Pony will persist the user's app key in S3 so it can pull in changes as the user edits their dropbox. 
 
 #### fetching
 
@@ -53,7 +62,7 @@ build('src', 'build').then(function() {
 
 #### deploying
 
-Set up your env:
+Set up your env (you don't need to do this on an EC2 instance, it can be permissioned with an instance role):
 
 ```bash
 export AWS_ACCESS_KEY_ID='yougotthatlonghairslickedbackwhitetshirt'
@@ -70,13 +79,6 @@ var bucket = new Bucket('taylorswift.com');
 bucket.push('1989').catch(function(reason) {
   logger.error('...and now weve got bad blood');
 }).done();
-```
-
-#### running the pull/build/deploy server
-
-```bash
-node app.js
-curl -XPOST localhost:8080/deploy_sync
 ```
 
 #### adding a page
@@ -99,11 +101,3 @@ Options for metadata are:
 #### Markdown overview
 
 [Markdown syntax](http://daringfireball.net/projects/markdown/syntax)
-
-#### Oauth2.0, until I decide to implement a little site on top of this:
-
-User goes to `https://www.dropbox.com/1/oauth2/authorize?client_id=KEY&response_type=code`, copies you the code.
-
-```bash
-curl -XPOST "https://api.dropbox.com/1/oauth2/token" -H 'application/x-www-form-urlencoded'  -d 'client_id=KEY&client_secret=SECRET9&code=CODE&grant_type=authorization_code'
-```
