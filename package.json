@@ -1,8 +1,8 @@
 {
-  "name": "portfolio",
+  "name": "pony-express",
   "version": "1.0.0",
-  "description": "A portfolio for Joph",
-  "repository": "https://github.com/griffinmyers/portfolio",
+  "description": "A build & deploy server for static websites backed by dropbox and served by S3",
+  "repository": "https://github.com/griffinmyers/pony-express",
   "scripts": {
     "start": "node app.js"
   },
