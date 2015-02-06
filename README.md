@@ -1,6 +1,6 @@
 # Pony Express
 
-A build server for building & deploying static websites backed by dropbox. A Dropbox webhook will hit this little web server whenver something changes and kick off a build/deploy of the site to S3 for serving. So to recap:
+A teeny server for building & deploying static websites backed by dropbox. A Dropbox webhook will hit this little web server whenver something changes and kick off a build/deploy of the site to S3 for serving. So to recap:
 
 * easy editing
 * the cheapest to host
