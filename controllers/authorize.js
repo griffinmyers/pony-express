@@ -3,6 +3,7 @@ var request = require('request');
 var Q = require('Q');
 var config = root_require('config');
 var logger = root_require('lib').logger;
+var store = new (root_require('lib').Store)(config.key_bucket);
 
 module.exports = {
   authorize: function(req, res) {
@@ -41,13 +42,14 @@ module.exports = {
       else {
         return result;
       }
+    }).then(function(result) {
+      return store.put(result.uid, result.access_token);
     }).then(function(result){
-      // save to s3 => {result.uid: result.access_token}
       logger.info('Authorization Succeeded, UID', result.uid);
-      res.send('ok computer')
+      res.send('ok computer');
     }, function(reason) {
       logger.error('Authorization Failed', reason.message);
-      res.send('borked')
+      res.status(500).send('borked')
     }).done();
   }
 };
