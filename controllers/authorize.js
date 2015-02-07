@@ -1,6 +1,6 @@
 var url = require('url')
 var request = require('request');
-var Q = require('Q');
+var Q = require('q');
 var config = root_require('config');
 var logger = root_require('lib').logger;
 var store = new (root_require('lib').Store)(config.key_bucket);
