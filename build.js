@@ -43,6 +43,7 @@ function metalsmith(source, destination) {
     .use(markdown(markdown_options))
     .use(bind_template())
     .use(two_column())
+    .use(partial())
     .use(templates('jade'))
     .use(sass(sass_options));
 
@@ -86,13 +87,38 @@ function two_column() {
   // `right: right-page` to the metadata of a file.
   //
   return function _two_column(files, metalsmith) {
-    _.forEach(files, function(f, file_name) {
-      if(_.has(f, 'left') && _.has(f, 'right')) {
+    _.forEach(files, function(file, file_name) {
+      if(_.has(file, 'left') && _.has(file, 'right')) {
         _.map(['left', 'right'], function(col) {
-          var col_file_name = path.join(path.dirname(file_name), f[col] + '.html');
-          f[col] = files[col_file_name].contents;
+          var col_file_name = path.join(path.dirname(file_name), file[col] + '.html');
+          file[col] = files[col_file_name].contents;
           delete files[col_file_name];
         });
+      }
+    });
+  }
+}
+
+function partial() {
+  //
+  // ## partial
+  //
+  // This middleware will take any .md file that has `partial: whatever` in the
+  // meta-data and expose its contents under 'whatever'.
+  //
+  return function _partial(files, metalsmith) {
+    var partials = {};
+
+    _.forEach(files, function(file, file_name) {
+      if(_.has(file, 'partial')) {
+        partials[file.partial] = file.contents;
+        delete files[file_name];
+      }
+    });
+
+    _.forEach(files, function(file, file_name) {
+      if(path.extname(file_name) === '.html') {
+        _.extend(file, partials);
       }
     });
   }
