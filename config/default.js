@@ -1,6 +1,6 @@
 module.exports = {
   port: process.env.PORT || 3000,
-  redirect_uri: 'http://localhost:3000/authorize/redirect',
+  redirect_uri: 'https://ponyexprss.com/authorize/redirect',
   destination: 'build',
   source: 'src',
   key_bucket: 'dropbox-keys',
