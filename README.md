@@ -28,8 +28,8 @@ This will link the users' dropbox up with pony express. Pony will persist the us
 Set up your env:
 
 ```bash
-export DROPBOX_APP_KEY=iknewyouweretroublewhenyouwalkedin
-export DROPBOX_APP_SECRET=whyyougottabesomean
+export DROPBOX_APP_KEY='iknewyouweretroublewhenyouwalkedin'
+export DROPBOX_APP_SECRET='whyyougottabesomean'
 ```
 
 ```javascript
