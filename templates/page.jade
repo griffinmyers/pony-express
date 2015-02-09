@@ -1,7 +1,7 @@
 extends ./layout.jade
 
 block vars
-  - var title = locals.title
+  - if(locals.title) { title = locals.title }
 
 block content
   != contents

@@ -43,7 +43,6 @@ function metalsmith(source, destination) {
     .use(markdown(markdown_options))
     .use(bind_template())
     .use(two_column())
-    .use(breadcrumb())
     .use(templates('jade'))
     .use(sass(sass_options));
 
@@ -94,34 +93,6 @@ function two_column() {
           f[col] = files[col_file_name].contents;
           delete files[col_file_name];
         });
-      }
-    });
-  }
-}
-
-function breadcrumb() {
-  //
-  // ## breadcrumb
-  //
-  // Adds a .breadcrumb attribute to the view, which is an array of
-  // { display, link } objects.
-  //
-  return function _breadcrumb(files, metalsmith) {
-    _.forEach(files, function(f, file_name) {
-      if(path.extname(file_name) === '.html') {
-        f.breadcrumb = _.reduce(file_name.split(path.sep), function(acc, dir) {
-          if(_.contains(['index.html', 'error.html'], path.basename(dir))) {
-            return acc;
-          }
-
-          return _.extend({}, acc, {
-            path: acc.path + dir + '/',
-            links: acc.links.concat({
-              display: dir.split('-').join(' '),
-              link: acc.path + dir
-            })
-          });
-        }, {path: '/', links: [{display: 'home', link: '/'}]}).links;
       }
     });
   }
