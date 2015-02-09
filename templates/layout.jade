@@ -7,7 +7,17 @@ block vars
 html(lang='en')
   head
     meta(charset='utf-8')
-    title Jophy #{title}
+    meta(name='viewport' content='width=device-width, initial-scale=1')
+    title Joe D Shaner #{title}
+    link(href='http://fonts.googleapis.com/css?family=Raleway:400,300,600' rel='stylesheet' type='text/css')
     link(rel='stylesheet', href='/css/index.css')
   body
-    block content
+    .container
+      h1.banner Joe D. Shaner
+      .breadcrumb
+        ul
+          each crumb in breadcrumb
+            li
+              a(href=crumb.link)= crumb.display
+
+      block content

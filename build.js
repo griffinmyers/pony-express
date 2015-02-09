@@ -1,3 +1,7 @@
+var path = require('path');
+global.root_require = function root_require(p) { return require(path.join(__dirname, p)); }
+
+var fs = require('fs');
 var _ = require('lodash');
 var Q = require('q');
 var path = require('path');
@@ -18,7 +22,7 @@ function metalsmith(source, destination) {
     tables: true,
     breaks: false,
     pedantic: false,
-    sanitize: true,
+    sanitize: false,
     smartLists: true,
     smartypants: true
   };
@@ -38,8 +42,10 @@ function metalsmith(source, destination) {
     .use(asset(asset_options))
     .use(markdown(markdown_options))
     .use(bind_template())
+    .use(two_column())
+    .use(breadcrumb())
     .use(templates('jade'))
-    .use(sass(sass_options))
+    .use(sass(sass_options));
 
   if(is_dev && is_script) {
     var serve = require('metalsmith-serve');
@@ -63,10 +69,59 @@ function bind_template() {
   // about templates unless he really wants to, so this is a reasonable default
   // I think.
   //
-  return function bt(files, metalsmith) {
+  return function _bind_template(files, metalsmith) {
     _.forEach(files, function(file, file_name) {
       if(path.extname(file_name) === '.html') {
-        file.template = (file.template || 'page') + '.jade';
+        file.template = (file.template || 'partial') + '.jade';
+      }
+    });
+  }
+}
+
+function two_column() {
+  //
+  // ## two_column
+  //
+  // This middleware will allow 2 different markdown files to specify two
+  // different columns in a layout. Just add a `left: left-page`,
+  // `right: right-page` to the metadata of a file.
+  //
+  return function _two_column(files, metalsmith) {
+    _.forEach(files, function(f, file_name) {
+      if(_.has(f, 'left') && _.has(f, 'right')) {
+        _.map(['left', 'right'], function(col) {
+          var col_file_name = path.join(path.dirname(file_name), f[col] + '.html');
+          f[col] = files[col_file_name].contents;
+          delete files[col_file_name];
+        });
+      }
+    });
+  }
+}
+
+function breadcrumb() {
+  //
+  // ## breadcrumb
+  //
+  // Adds a .breadcrumb attribute to the view, which is an array of
+  // { display, link } objects.
+  //
+  return function _breadcrumb(files, metalsmith) {
+    _.forEach(files, function(f, file_name) {
+      if(path.extname(file_name) === '.html') {
+        f.breadcrumb = _.reduce(file_name.split(path.sep), function(acc, dir) {
+          if(_.contains(['index.html', 'error.html'], path.basename(dir))) {
+            return acc;
+          }
+
+          return _.extend({}, acc, {
+            path: acc.path + dir + '/',
+            links: acc.links.concat({
+              display: dir.split('-').join(' '),
+              link: acc.path + dir
+            })
+          });
+        }, {path: '/', links: [{display: 'home', link: '/'}]}).links;
       }
     });
   }
