@@ -1,3 +1,4 @@
+var _ = require('lodash');
 var logger = root_require('lib').logger;
 var deploy = root_require('lib').deploy;
 
