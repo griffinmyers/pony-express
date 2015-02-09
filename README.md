@@ -1,5 +1,7 @@
 # Pony Express
 
+[ponyexprss](http://ponyexprss.com/)
+
 A teeny server for building & deploying static websites backed by dropbox. A Dropbox webhook will hit this little web server whenver something changes and kick off a build/deploy of the site to S3 for serving. So to recap:
 
 * easy editing
@@ -19,7 +21,7 @@ curl -XPOST localhost:8080/deploy
 
 `GET /authorize`
 
-This will link the users' dropbox up with pony express. Pony will persist the user's app key in S3 so it can pull in changes as the user edits their dropbox. 
+This will link the users' dropbox up with pony express. Pony will persist the user's app key in S3 so it can pull in changes as the user edits their dropbox.
 
 #### fetching
 
