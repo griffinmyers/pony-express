@@ -3,6 +3,6 @@ module.exports = {
     bucket: 'joeshaner.com'
   },
   544017: {
-    bucket: 'joeshaner-dev.com'
+    bucket: 'joeshaner-dev'
   }
 };
