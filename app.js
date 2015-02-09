@@ -8,11 +8,14 @@ var config = root_require('config');
 var logger = root_require('lib').logger;
 var verify = root_require('lib').verify;
 
+var RootController = root_require('controllers').RootController;
 var AuthorizeController = root_require('controllers').AuthorizeController;
 var DeployController = root_require('controllers').DeployController;
 
+app.set('view engine', 'jade');
 app.use(morgan('common', {stream: logger.stream}));
 
+app.get('/', RootController.index);
 app.get('/authorize', AuthorizeController.authorize);
 app.get('/authorize/redirect', AuthorizeController.redirect);
 app.get('/deploy', DeployController.challenge);

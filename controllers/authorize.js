@@ -46,10 +46,10 @@ module.exports = {
       return store.put(result.uid, result.access_token);
     }).then(function(result){
       logger.info('Authorization Succeeded, UID', result.uid);
-      res.send('ok computer');
+      res.render('content', {content: 'Ok Computer'});
     }, function(reason) {
       logger.error('Authorization Failed', reason.message);
-      res.status(500).send('borked')
+      res.status(500).render('content', {content: 'Authorization Failed'});
     }).done();
   }
 };
