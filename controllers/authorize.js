@@ -43,9 +43,11 @@ module.exports = {
         return result;
       }
     }).then(function(result) {
-      return store.put(result.uid, result.access_token);
-    }).then(function(result){
-      logger.info('Authorization Succeeded, UID', result.uid);
+      return store.put(result.uid, result.access_token).then(function() {
+        return result.uid
+      })
+    }).then(function(uid){
+      logger.info('Authorization Succeeded, UID', uid);
       res.render('content', {content: 'Ok Computer'});
     }, function(reason) {
       logger.error('Authorization Failed', reason.message);
