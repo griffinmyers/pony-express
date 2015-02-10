@@ -2,26 +2,15 @@ var path = require('path');
 global.root_require = function root_require(p) { return require(path.join(__dirname, p)); }
 
 var app = require('express')();
-var bodyParser = require('body-parser');
 var morgan = require('morgan');
 var config = root_require('config');
 var logger = root_require('lib').logger;
-var verify = root_require('lib').verify;
-
-var RootController = root_require('controllers').RootController;
-var AuthorizeController = root_require('controllers').AuthorizeController;
-var DeployController = root_require('controllers').DeployController;
+var router = root_require('routes');
 
 app.set('view engine', 'jade');
 app.use(morgan('common', {stream: logger.stream}));
-
-app.get('/', RootController.index);
-app.get('/authorize', AuthorizeController.authorize);
-app.get('/authorize/redirect', AuthorizeController.redirect);
-app.get('/deploy', DeployController.challenge);
-app.post('/deploy', bodyParser.json({verify: verify}), DeployController.deploy);
-app.post('/deploy/sync', bodyParser.json(), DeployController.deploy_sync);
+app.use('/', router);
 
 app.listen(config.port, function server() {
-  logger.info('node server listening on', config.port);
+  logger.info('port for the buddies >>>', config.port);
 });
