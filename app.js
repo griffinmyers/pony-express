@@ -1,5 +1,4 @@
-var path = require('path');
-global.root_require = function root_require(p) { return require(path.join(__dirname, p)); }
+global.root_require = function root_require(p) { return require(require('path').join(__dirname, p)); }
 
 var app = require('express')();
 var morgan = require('morgan');
