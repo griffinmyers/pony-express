@@ -1,7 +1,7 @@
 bower_components
 node_modules
 src
-build
+build/*
 *.log
 
 # Elastic Beanstalk Files
