@@ -12,7 +12,14 @@ A teeny server for building & deploying static websites backed by dropbox. A Dro
 
 ```bash
 node app.js
+
+# In production
+#
 curl -XPOST localhost:8080/deploy
+
+# Testing
+#
+curl -XPOST localhost:3000/deploy/sync -H 'content-type: application/json' -d '{"id": 544017}'
 ```
 
 ### The Process (by component)
