@@ -30,19 +30,13 @@ curl -XPOST localhost:3000/deploy/sync -H 'content-type: application/json' -d '{
 
 This will link the users' dropbox up with pony express. Pony will persist the user's app key in S3 so it can pull in changes as the user edits their dropbox.
 
-#### fetching
-
-Set up your env:
-
-```bash
-export DROPBOX_APP_KEY='iknewyouweretroublewhenyouwalkedin'
-export DROPBOX_APP_SECRET='whyyougottabesomean'
-```
+#### syncing
 
 ```javascript
-var dropbox = require('./lib').dropbox;
+var Dropbox = require('./lib').Dropbox;
+var dropbox = new Dropbox('ACCESS_KEY', 'source/123');
 
-dropbox.save('local_dir').then(function(result) {
+dropbox.sync().then(function(result) {
   logger.info('...dancing to electro pop like a robot from 1984');
 }).done();
 ```
