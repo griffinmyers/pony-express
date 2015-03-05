@@ -3,18 +3,18 @@
 [ponyexprss](http://ponyexprss.com/)
 
 ```
-+-------------+      +----------------+      +-----------+
-|             |      |                |      |           |
-|   Dropbox   | +--> |  Pony Express  | +--> |    S3     |
-|             |      |                |      |           |
-+-------------+      +------|\----/|--+      +-----------+
-|             |      |   ___| \,,/_/  |      |           |
-| * Templates |      | +-__/ \/    \  |      | * HTML    |
-| * Styles    |      |_+-/     ($)  \ |      | * CSS     |
-| * Scripts   |      | -/    (_      \|      | * Scripts |
-| * Markdown  |      | /       \_ / ==\      |           |
-|             |      |         / \_ O o)     |           |
-+-------------+      +-------------\==/`     +-----------+
++-------------+      +----------------+      +-------------+
+|             |      |                |      |             |
+|   Dropbox   | +--> |  Pony Express  | +--> |     S3      |
+|             |      |                |      |             |
++-------------+      +------|\----/|--+      +-------------+
+|             |      |   ___| \,,/_/  |      |             |
+| * Templates |      | +-__/ \/    \  |      | * HTML      |
+| * Styles    |      |_+-/     ($)  \ |      | * CSS       |
+| * Scripts   |      | -/    (_      \|      | * Scripts   |
+| * Markdown  |      | /       \_ / ==\      |             |
+|             |      |         / \_ O o)     |             |
++-------------+      +-------------\==/`     +-------------+
 ```
 
 A teeny server for building & deploying static websites backed by dropbox. A Dropbox webhook will hit this little web server whenever something changes and kick off a build/deploy of the site to S3 for serving. So to recap:
