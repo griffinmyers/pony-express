@@ -15,7 +15,6 @@
 | * Markdown  |      | /       \_ / ==\      |           |
 |             |      |         / \_ O o)     |           |
 +-------------+      +-------------\==/`     +-----------+
-
 ```
 
 A teeny server for building & deploying static websites backed by dropbox. A Dropbox webhook will hit this little web server whenever something changes and kick off a build/deploy of the site to S3 for serving. So to recap:
