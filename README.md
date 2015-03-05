@@ -2,105 +2,63 @@
 
 [ponyexprss](http://ponyexprss.com/)
 
-A teeny server for building & deploying static websites backed by dropbox. A Dropbox webhook will hit this little web server whenver something changes and kick off a build/deploy of the site to S3 for serving. So to recap:
+```
++-------------+      +----------------+      +-----------+
+|             |      |                |      |           |
+|   Dropbox   | +--> |  Pony Express  | +--> |   S3      |
+|             |      |                |      |           |
++-------------+      +------|\----/|--+      +-----------+
+|             |      |   ___| \,,/_/  |      |           |
+| * Templates |      | +-__/ \/    \  |      | * HTML    |
+| * Styles    |      |_+-/     ($)  \ |      | * CSS     |
+| * Scripts   |      | -/    (_      \|      | * Scripts |
+| * Markdown  |      | /       \_ / ==\      |           |
+|             |      |         / \_ O o)     |           |
++-------------+      +-------------\==/`     +-----------+
+
+```
+
+A teeny server for building & deploying static websites backed by dropbox. A Dropbox webhook will hit this little web server whenever something changes and kick off a build/deploy of the site to S3 for serving. So to recap:
 
 * easy editing
 * the cheapest to host
 * the fastest response times
 
+## Live Examples
+
+* [wgm.cool](http://wgm.cool)
+
 ### Running
 
 ```bash
-node app.js
+$ node app.js
 
 # In production
 #
-curl -XPOST localhost:8080/deploy
+$ curl -XPOST localhost:8080/deploy
 
 # Testing
 #
-curl -XPOST localhost:3000/deploy/sync -H 'content-type: application/json' -d '{"id": 544017}'
+$ curl -XPOST localhost:3000/deploy/sync -H 'content-type: application/json' -d '{"id": 544017}'
 ```
 
-### The Process (by component)
+### Developing
 
-#### authorizing
-
-`GET /authorize`
-
-This will link the users' dropbox up with pony express. Pony will persist the user's app key in S3 so it can pull in changes as the user edits their dropbox.
-
-#### syncing
-
-```javascript
-var Dropbox = require('./lib').Dropbox;
-var dropbox = new Dropbox('ACCESS_KEY', 'source/123');
-
-dropbox.sync().then(function(result) {
-  logger.info('...dancing to electro pop like a robot from 1984');
-}).done();
-```
-
-#### building
+With your `/src` folder already populated, you can run either of the two to push to S3 or service locally. Here `[dropbox-id]` is also the source folder under `/src`, i.e. `/src/[dropbox-id]`
 
 ```bash
-node build.js
+$ node build [dropbox-id] push
+$ node build [dropbox-id] dev
 ```
 
-or for dev (watching + serving)
+### Registering
 
-```bash
-node build.js dev
-```
+Run the application and visit `/authorize` to get dropbox keys properly installed. 
 
-or as a module
+### In Depth
 
-```javascript
-var build = require('./build');
-
-build('src', 'build').then(function() {
-  console.log('I bet that you look good on the dance floor');
-}).done();
-```
-
-#### deploying
-
-Set up your env (you don't need to do this on an EC2 instance, it can be permissioned with an instance role):
-
-```bash
-export AWS_ACCESS_KEY_ID='yougotthatlonghairslickedbackwhitetshirt'
-export AWS_SECRET_ACCESS_KEY='andigotthatgoodgirlfaithandatightlittleskirt'
-```
-
-And huck those bits with the fury of an async runtime:
-
-```javascript
-var Bucket = require('./lib').Bucket;
-
-var bucket = new Bucket('taylorswift.com');
-
-bucket.push('1989').catch(function(reason) {
-  logger.error('...and now weve got bad blood');
-}).done();
-```
-
-#### adding a page
-
-```markdown
----
-title: About
-date: 2015-01-01
----
-
-I started out as a simple man.
-```
-
-Options for metadata are:
-
-* `title`
-* `date`
-* `template`: defaults to `page`, but can also be: `layout`.
-
-#### Markdown overview
-
-[Markdown syntax](http://daringfireball.net/projects/markdown/syntax)
+* Dropbox hits Pony Express up any time there's a change to the app folder. 
+* Pony Express fetches the files that have changed and rebuilds the website
+* Pony Express notces which build files have been changed, added, or deleted
+  and pushes those changes to S3. 
+* S3 serves up the public-facing website. 
