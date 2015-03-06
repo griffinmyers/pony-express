@@ -21,7 +21,8 @@ module.exports = {
         {name: 'sass', args: {outputDir: 'assets/css'}},
         {name: 'uglify', args: {removeOriginal: true}},
         {name: 'move', args: {source: '_code/scripts', destination: 'assets/scripts'}},
-        {name: 'clean', args: '_code'}
+        {name: 'clean', args: '_code'},
+        {name: 'clean', args: '.pony-token'}
       ];
     }
   },
@@ -44,7 +45,8 @@ module.exports = {
   //       {name: 'sass', args: {outputDir: 'assets/css'}},
   //       {name: 'uglify', args: {removeOriginal: true}},
   //       {name: 'move', args: {source: '_code/scripts', destination: 'assets/scripts'}},
-  //       {name: 'clean', args: '_code'}
+  //       {name: 'clean', args: '_code'},
+  //       {name: 'clean', args: '.pony-token'}
   //     ];
   //   }
   // },
@@ -64,7 +66,8 @@ module.exports = {
         {name: 'templates', args: {engine: 'jade', directory: path.join(source, '_code', 'templates')}},
         {name: 'sass', args: {outputDir: 'assets/css'}},
         {name: 'move', args: {source: '_code/scripts', destination: 'assets/scripts'}},
-        {name: 'clean', args: '_code'}
+        {name: 'clean', args: '_code'},
+        {name: 'clean', args: '.pony-token'}
       ];
     }
   }
