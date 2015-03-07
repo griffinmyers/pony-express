@@ -17,7 +17,9 @@
 +-------------+      +-------------\==/`     +-------------+
 ```
 
-A teeny server for building & deploying static websites backed by dropbox. A Dropbox webhook will hit this little web server whenever something changes and kick off a build/deploy of the site to S3 for serving. So to recap:
+A teeny server for building & deploying static websites backed by dropbox. Your website is immediately updated when you save a file. 
+
+Recap:
 
 * easy editing
 * the cheapest to host
@@ -26,6 +28,7 @@ A teeny server for building & deploying static websites backed by dropbox. A Dro
 ## Live Examples
 
 * [wgm.cool](http://wgm.cool)
+* [joeshaner.com](http://joeshaner.com)
 
 ### Running
 
