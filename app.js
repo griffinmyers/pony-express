@@ -7,7 +7,7 @@ var logger = root_require('lib').logger;
 var router = root_require('routes');
 
 app.set('view engine', 'jade');
-app.use(morgan('common', {stream: logger.stream}));
+app.use(morgan('common', logger.morgan));
 app.use('/', router);
 
 app.listen(config.port, function server() {
