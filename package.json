@@ -4,7 +4,8 @@
   "description": "A build & deploy server for static websites backed by dropbox and served by S3",
   "repository": "https://github.com/griffinmyers/pony-express",
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "test": "node_modules/mocha/bin/mocha --reporter nyan"
   },
   "dependencies": {
     "aws-sdk": "2.1.7",
@@ -31,6 +32,8 @@
   },
   "devDependencies": {
     "metalsmith-serve": "0.0.3",
-    "metalsmith-watch": "0.2.0"
+    "metalsmith-watch": "0.2.0",
+    "mocha": "^2.2.1",
+    "should": "^5.2.0"
   }
 }
