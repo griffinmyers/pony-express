@@ -64,3 +64,11 @@ Run the application and visit `/authorize` to get dropbox keys properly installe
 * Pony Express notces which build files have been changed, added, or deleted
   and pushes those changes to S3. 
 * S3 serves up the public-facing website. 
+
+### Contributing
+
+* Fork
+* Edit
+* Write test
+* Run tests `npm test`
+* PR
