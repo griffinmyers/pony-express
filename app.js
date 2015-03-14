@@ -10,6 +10,10 @@ app.set('view engine', 'jade');
 app.use(morgan('common', logger.morgan));
 app.use('/', router);
 
-app.listen(config.port, function server() {
-  logger.info('port for the buddies >>>', config.port);
-});
+if(!module.parent) {
+  app.listen(config.port, function server() {
+    logger.info('port for the buddies >>>', config.port);
+  });
+}
+
+module.exports = app;

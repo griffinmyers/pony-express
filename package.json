@@ -5,7 +5,7 @@
   "repository": "https://github.com/griffinmyers/pony-express",
   "scripts": {
     "start": "node app.js",
-    "test": "node_modules/mocha/bin/mocha --reporter nyan"
+    "test": "node_modules/mocha/bin/mocha"
   },
   "dependencies": {
     "aws-sdk": "2.1.7",
@@ -33,7 +33,8 @@
   "devDependencies": {
     "metalsmith-serve": "0.0.3",
     "metalsmith-watch": "0.2.0",
-    "mocha": "^2.2.1",
-    "should": "^5.2.0"
+    "mocha": "2.2.1",
+    "should": "5.2.0",
+    "supertest": "0.15.0"
   }
 }
