@@ -1,6 +1,5 @@
 var path = require('path');
 var should = require('should');
-var assert = require('assert');
 
 describe('Config', function(){
 

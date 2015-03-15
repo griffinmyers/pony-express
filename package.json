@@ -5,7 +5,7 @@
   "repository": "https://github.com/griffinmyers/pony-express",
   "scripts": {
     "start": "node app.js",
-    "test": "node_modules/mocha/bin/mocha"
+    "test": "node_modules/mocha/bin/mocha --reporter spec 'test/**/*.js'"
   },
   "dependencies": {
     "aws-sdk": "2.1.7",
