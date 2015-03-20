@@ -48,7 +48,7 @@ module.exports = {
     }
   },
   59006125: {
-    bucket: 'fallcreekfarm.org',
+    bucket: 'fallcreekfarm',
     middleware: function(source) {
       return [
         {name: 'asset', args: {src: 'images', dest: 'images'}},
