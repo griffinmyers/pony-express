@@ -2,6 +2,7 @@ var should = require('should');
 var middleware = require('../../lib/middleware');
 var bind_template = middleware.bind_template;
 var clean = middleware.clean;
+var expose = middleware.expose;
 var move = middleware.move;
 
 describe('Middlware', function() {
@@ -56,6 +57,13 @@ describe('Middlware', function() {
       files.should.not.have.property('a/b.css');
     });
 
+  });
+
+  describe('expose()', function() {
+    it('exposes variables', function() {
+      expose({dale_cooper: 'Damn Good Coffee'})(files);
+      files['b.html'].should.have.property('dale_cooper', 'Damn Good Coffee')
+    });
   });
 
   describe('move()', function() {
