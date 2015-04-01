@@ -6,6 +6,9 @@ var expose = middleware.expose;
 var move = middleware.move;
 var page = middleware.page;
 var partial = middleware.partial;
+var row = middleware.row;
+var two_column = middleware.two_column;
+var wrap = middleware.wrap;
 
 describe('Middlware', function() {
 
@@ -113,7 +116,7 @@ describe('Middlware', function() {
             {date: '2015-01-04', title: 'Post 4'}
           ]
         }
-      };
+     };
     });
 
     it('pages', function() {
@@ -258,7 +261,7 @@ describe('Middlware', function() {
             {date: new Date('2015-01-04'), title: 'Post 4'}
           ]
         }
-      };
+     };
 
       page()(files, metalsmith);
 
@@ -283,7 +286,7 @@ describe('Middlware', function() {
     it('exposes partials', function() {
 
       files['d.html'] = {partial: 'd', contents: 'bloop'};
-      partial()(files)
+      partial()(files);
       files.should.not.have.property('d.html');
       files['b.html'].should.have.property('d', 'bloop');
       files['a/b.html'].should.have.property('d', 'bloop');
@@ -294,5 +297,118 @@ describe('Middlware', function() {
     });
 
   });
+
+  describe('row', function() {
+
+    it('Adds rows', function() {
+      files['row1.html'] = {contents: 'bleep'};
+      files['row2.html'] = {contents: 'bloop'};
+      files['d.html'] =  {rows: 'row1, row2'};
+      row()(files)
+
+      files.should.not.have.property('row1.html');
+      files.should.not.have.property('row2.html');
+      files.should.have.property('d.html');
+      files['d.html'].rows.should.have.length(2);
+      files['d.html'].rows[0].should.have.property('contents', 'bleep');
+      files['d.html'].rows[0].should.have.property('two_column', false);
+      files['d.html'].rows[1].should.have.property('contents', 'bloop');
+      files['d.html'].rows[1].should.have.property('two_column', false);
+    });
+
+    it('Adds rows even when files mismatch', function() {
+      files['row1.html'] = {contents: 'bleep'};
+      files['row2.html'] = {contents: 'bloop'};
+      files['d.html'] =  {rows: 'row1, row2, row3'};
+
+      row()(files)
+
+      files.should.have.property('d.html');
+      files['d.html'].rows.should.have.length(3);
+      files['d.html'].rows[2].should.have.property('contents', undefined);
+    });
+
+    it('supports two-col layouts', function() {
+      files['row1-left.html'] = {contents: 'bloop-left'}
+      files['row1-right.html'] = {contents: 'bloop-right'}
+      files['row1.html'] = {contents: 'bleep', left: 'row1-left', right: 'row1-right'};
+      files['d.html'] =  {rows: 'row1'};
+      row()(files)
+
+      files.should.not.have.property('row1.html');
+      files.should.have.property('d.html');
+      files['d.html'].rows.should.have.length(1);
+      files['d.html'].rows[0].should.have.property('contents', 'bleep');
+      files['d.html'].rows[0].should.have.property('two_column', true);
+      files['d.html'].rows[0].should.have.property('left', 'row1-left');
+      files['d.html'].rows[0].should.have.property('right', 'row1-right');
+    });
+
+    it('must have a left and right col', function() {
+      files['row1-left.html'] = {contents: 'bloop-left'}
+      files['row1-right.html'] = {contents: 'bloop-right'}
+      files['row1.html'] = {contents: 'bleep', left: 'row1-left'};
+      files['d.html'] =  {rows: 'row1'};
+      row()(files)
+
+      files.should.not.have.property('row1.html');
+      files.should.have.property('d.html');
+      files['d.html'].rows.should.have.length(1);
+      files['d.html'].rows[0].should.have.property('contents', 'bleep');
+      files['d.html'].rows[0].should.have.property('two_column', false);
+      files['d.html'].rows[0].should.not.have.property('left');
+      files['d.html'].rows[0].should.not.have.property('right');
+    });
+
+  });
+
+  describe('two_column', function() {
+
+    it('supports two columns', function() {
+      files['left.html'] = {contents: 'bleep'};
+      files['right.html'] = {contents: 'bloop'};
+      files['d.html'] =  {left: 'left', right: 'right'};
+
+      two_column()(files)
+      files.should.have.property('d.html');
+      files.should.not.have.property('left.html');
+      files.should.not.have.property('right.html');
+      files['d.html'].should.have.property('left', 'bleep');
+      files['d.html'].should.have.property('right', 'bloop');
+    });
+
+    it('must have two columns', function() {
+      files['left.html'] = {contents: 'bleep'};
+      files['d.html'] =  {left: 'left'};
+
+      two_column()(files)
+      files.should.have.property('d.html');
+      files.should.have.property('left.html');
+    });
+
+  });
+
+  describe('wrap', function() {
+
+    it('wraps', function() {
+      files['d.html'] = {contents: new Buffer('bleep'), wrap: 'bloop'}
+
+      wrap()(files)
+      files.should.have.property('d.html');
+      files['d.html'].should.have.property('contents');
+      files['d.html']['contents'].toString().should.be.equal('<div class="bloop">bleep</div>');
+    });
+
+    it('wraps empty', function() {
+      files['d.html'] = {contents: new Buffer('bleep'), wrap: ''}
+
+      wrap()(files)
+      files.should.have.property('d.html');
+      files['d.html'].should.have.property('contents');
+      files['d.html']['contents'].toString().should.be.equal('<div class="">bleep</div>');
+    });
+
+  });
+
 
 });
