@@ -5,6 +5,7 @@ var clean = middleware.clean;
 var expose = middleware.expose;
 var move = middleware.move;
 var page = middleware.page;
+var partial = middleware.partial;
 
 describe('Middlware', function() {
 
@@ -116,6 +117,7 @@ describe('Middlware', function() {
     });
 
     it('pages', function() {
+
       page()(files, metalsmith);
       files.should.have.property('blog/index.html');
       files['blog/index.html'].should.have.property('prev', null);
@@ -148,9 +150,11 @@ describe('Middlware', function() {
       files['blog/2/index.html'].posts[0].should.have.property('date', '2015-01-04');
       files['blog/2/index.html'].posts[0].should.have.property('title', 'Post 4');
       files['blog/2/index.html'].posts[0].should.have.property('date_string', '2015-01-04');
+
     });
 
     it('pages the links properly', function() {
+
       page({perPage: 1})(files, metalsmith);
       files.should.have.property('blog/index.html');
       files['blog/index.html'].should.have.property('prev', null);
@@ -167,33 +171,41 @@ describe('Middlware', function() {
       files.should.have.property('blog/4/index.html');
       files['blog/4/index.html'].should.have.property('prev', 3);
       files['blog/4/index.html'].should.have.property('next', null);
+
     });
 
     it('lets me change collections', function() {
+
       metalsmith._metadata['boops'] = metalsmith._metadata['posts'];
       delete metalsmith._metadata['posts'];
 
       page({collection: 'boops'})(files, metalsmith);
       files.should.have.property('blog/index.html');
       files.should.have.property('blog/2/index.html');
+
     });
 
     it('lets me change targets', function() {
+
       page({target: 'boops'})(files, metalsmith);
       files.should.have.property('boops/index.html');
       files.should.have.property('boops/2/index.html');
+
     });
 
 
     it('lets me change templates', function() {
+
       page({template: 'boops'})(files, metalsmith);
       files.should.have.property('blog/index.html');
       files['blog/index.html'].should.have.property('template', 'boops');
       files.should.have.property('blog/2/index.html');
       files['blog/2/index.html'].should.have.property('template', 'boops');
+
     });
 
     it('lets me create permalinks', function() {
+
       page({perma: 'true'})(files, metalsmith);
       files.should.have.property('blog/index.html');
       files.should.have.property('blog/2/index.html');
@@ -232,9 +244,11 @@ describe('Middlware', function() {
       files['blog/index.html']['posts'][1].should.have.property('perma_link', '/blog/archive/0e8a3466832ec5cebefd8cc299e240383be38177');
       files['blog/index.html']['posts'][2].should.have.property('perma_link', '/blog/archive/90c5cd937ff6c221a14b89799c4c541ad6cf1e0a');
       files['blog/2/index.html']['posts'][0].should.have.property('perma_link', '/blog/archive/b515c81d47640fb1d19b6441e7902e37070b2dc6');
+
     });
 
     it('deals with parsed dates', function() {
+
       metalsmith = {
         '_metadata': {
           'posts': [
@@ -262,6 +276,23 @@ describe('Middlware', function() {
 
     });
 
- });
+  });
+
+  describe('partial()', function() {
+
+    it('exposes partials', function() {
+
+      files['d.html'] = {partial: 'd', contents: 'bloop'};
+      partial()(files)
+      files.should.not.have.property('d.html');
+      files['b.html'].should.have.property('d', 'bloop');
+      files['a/b.html'].should.have.property('d', 'bloop');
+      files['a/c.html'].should.have.property('d', 'bloop');
+      files['a/b.css'].should.not.have.property('d', 'bloop');
+      files['a/d/e.js'].should.not.have.property('d', 'bloop');
+
+    });
+
+  });
 
 });
