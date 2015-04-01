@@ -4,6 +4,8 @@ var path = require('path');
 var config = require('./config');
 var build = require('./lib/build');
 var Bucket = require('./lib/bucket');
+var Dropbox = require('./lib/dropbox');
+var store = new (require('./lib/store'))(config.key_bucket);
 
 if(process.argv.length < 3) {
   console.log('Usage: node build.js id [dev, push]');
@@ -19,13 +21,21 @@ var middleware = (user && user.middleware(staging_dir)) || [] ;
 
 var is_dev = false;
 var is_push = false;
+var is_fetch = false;
 
 if(process.argv.length > 3) {
   is_dev = process.argv[3] === 'dev';
   is_push = process.argv[3] === 'push';
+  is_fetch = process.argv[3] === 'fetch';
 }
 
 var is_script = !module.parent;
+
+if(is_fetch) {
+  store.get(id).then(function(result) {
+    return new Dropbox(result.Body.toString(), path.join(config.source, 'fetch')).sync();
+  }).done();
+}
 
 if(is_script) {
   build(config.root, staging_dir, build_dir, middleware, is_dev).then(function(result) {
