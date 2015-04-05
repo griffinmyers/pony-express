@@ -1,10 +1,6 @@
-var url = require('url');
 var should = require('should');
-var qs = require('querystring');
 var nock = require('nock');
 var Store = require('../../lib/store.js');
-
-// nock.recorder.rec();
 
 describe('Store', function() {
 
