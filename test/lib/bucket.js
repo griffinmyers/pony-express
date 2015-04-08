@@ -64,4 +64,20 @@ describe('Bucket', function() {
 
   });
 
+  describe('list()', function() {
+
+    it('lists the contents of a bucket', function(done) {
+      var amazon = nock('https://remote.s3.amazonaws.com:443')
+        .get('/')
+        .reply(200, '<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<ListBucketResult xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><Name>remote</Name><Prefix></Prefix><Marker></Marker><MaxKeys>1000</MaxKeys><IsTruncated>false</IsTruncated><Contents><Key>the-runner.txt</Key><LastModified>2015-04-08T02:11:10.000Z</LastModified><ETag>&quot;07acbec5291bd4c8bc1a6ead516c137e&quot;</ETag><Size>2126</Size><Owner><ID>65b749052bb8ea4df26271b212f78201abc29c23daaba7a05dc418f7fb5d053b</ID><DisplayName>griffin.myers</DisplayName></Owner><StorageClass>STANDARD</StorageClass></Contents><Contents><Key>burried/by/the/dasies.html</Key><LastModified>2015-03-26T08:19:29.000Z</LastModified><ETag>&quot;6b3ce9a3e306d8bd2baeb048f9f43d6b&quot;</ETag><Size>392</Size><Owner><ID>65b749052bb8ea4df26271b212f78201abc29c23daaba7a05dc418f7fb5d053b</ID><DisplayName>griffin.myers</DisplayName></Owner><StorageClass>STANDARD</StorageClass></Contents></ListBucketResult>');
+
+      this.bucket.list().then(function(res) {
+        res.should.eql(['the-runner.txt', 'burried/by/the/dasies.html']);
+        amazon.done();
+        done();
+      }, done).done();
+    });
+
+  });
+
 });
