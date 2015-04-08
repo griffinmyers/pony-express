@@ -12,10 +12,8 @@ var wrap = middleware.wrap;
 
 describe('Middlware', function() {
 
-  var files;
-
   beforeEach(function() {
-    files = {
+    this.files = {
       'b.html': {template: 'page'},
       'a/b.html': {template: 'page'},
       'a/c.html': {},
@@ -27,77 +25,77 @@ describe('Middlware', function() {
   describe('bind_template()', function() {
 
     it('adds .jade to html', function() {
-      bind_template()(files);
-      files['b.html'].should.have.property('template', 'page.jade');
-      files['a/b.html'].should.have.property('template', 'page.jade');
+      bind_template()(this.files);
+      this.files['b.html'].should.have.property('template', 'page.jade');
+      this.files['a/b.html'].should.have.property('template', 'page.jade');
     });
 
     it('adds .jade to html that dont have a template', function() {
-      bind_template()(files);
-      files['a/c.html'].should.have.property('template', 'partial.jade');
+      bind_template()(this.files);
+      this.files['a/c.html'].should.have.property('template', 'partial.jade');
     });
 
-    it('adds leaves non-html files alone', function() {
-      bind_template()(files);
-      files['a/b.css'].should.be.empty;
+    it('adds leaves non-html this.files alone', function() {
+      bind_template()(this.files);
+      this.files['a/b.css'].should.be.empty;
     });
 
   });
 
   describe('clean()', function() {
 
-    it('removes files', function() {
-      clean('b.html')(files);
-      files.should.not.have.property('b.html');
-      files.should.have.property('a/b.html');
-      files.should.have.property('a/c.html');
-      files.should.have.property('a/b.css');
+    it('removes this.files', function() {
+      clean('b.html')(this.files);
+      this.files.should.not.have.property('b.html');
+      this.files.should.have.property('a/b.html');
+      this.files.should.have.property('a/c.html');
+      this.files.should.have.property('a/b.css');
     });
 
-    it('removes files based on the prefix', function() {
-      clean('a')(files);
-      files.should.have.property('b.html');
-      files.should.not.have.property('a/b.html');
-      files.should.not.have.property('a/c.html');
-      files.should.not.have.property('a/b.css');
+    it('removes this.files based on the prefix', function() {
+      clean('a')(this.files);
+      this.files.should.have.property('b.html');
+      this.files.should.not.have.property('a/b.html');
+      this.files.should.not.have.property('a/c.html');
+      this.files.should.not.have.property('a/b.css');
     });
 
   });
 
   describe('expose()', function() {
     it('exposes variables', function() {
-      expose({dale_cooper: 'Damn Good Coffee'})(files);
-      files['b.html'].should.have.property('dale_cooper', 'Damn Good Coffee')
+      expose({dale_cooper: 'Damn Good Coffee'})(this.files);
+      this.files['b.html'].should.have.property('dale_cooper', 'Damn Good Coffee')
     });
   });
 
   describe('move()', function() {
 
-    it('moves files', function() {
-      move({source: 'a', destination: 'c'})(files)
-      files.should.have.property('b.html');
-      files.should.have.property('c/b.html');
-      files.should.have.property('c/c.html');
-      files.should.have.property('c/b.css');
-      files.should.have.property('c/d/e.js');
-      files.should.not.have.property('a/b.html');
-      files.should.not.have.property('a/c.html');
-      files.should.not.have.property('a/b.css');
+    it('moves this.files', function() {
+      move({source: 'a', destination: 'c'})(this.files)
+      this.files.should.have.property('b.html');
+      this.files.should.have.property('c/b.html');
+      this.files.should.have.property('c/c.html');
+      this.files.should.have.property('c/b.css');
+      this.files.should.have.property('c/d/e.js');
+      this.files.should.not.have.property('a/b.html');
+      this.files.should.not.have.property('a/c.html');
+      this.files.should.not.have.property('a/b.css');
     });
 
-    it('moves files from one nested dir to another', function() {
-      move({source: 'a/d', destination: 'a'})(files);
-      files.should.have.property('b.html');
-      files.should.have.property('a/b.html');
-      files.should.have.property('a/c.html');
-      files.should.have.property('a/b.css');
-      files.should.have.property('a/e.js');
-      files.should.not.have.property('a/d/e.js');
+    it('moves this.files from one nested dir to another', function() {
+      move({source: 'a/d', destination: 'a'})(this.files);
+      this.files.should.have.property('b.html');
+      this.files.should.have.property('a/b.html');
+      this.files.should.have.property('a/c.html');
+      this.files.should.have.property('a/b.css');
+      this.files.should.have.property('a/e.js');
+      this.files.should.not.have.property('a/d/e.js');
     });
 
-    it('overrides existing files', function() {
-      move({source: 'a/b.html', destination: 'a/c.html'})(files);
-      files.should.containDeep({'a/c.html': {template: 'page'}});
+    it('overrides existing this.files', function() {
+      move({source: 'a/b.html', destination: 'a/c.html'})(this.files);
+      this.files.should.containDeep({'a/c.html': {template: 'page'}});
     });
 
   });
@@ -121,59 +119,59 @@ describe('Middlware', function() {
 
     it('pages', function() {
 
-      page()(files, metalsmith);
-      files.should.have.property('blog/index.html');
-      files['blog/index.html'].should.have.property('prev', null);
-      files['blog/index.html'].should.have.property('next', 2);
-      files['blog/index.html'].should.have.property('target', 'blog');
-      files['blog/index.html'].should.have.property('template', 'page');
-      files['blog/index.html'].should.have.property('contents');
-      files['blog/index.html']['contents'].should.be.type('object');
-      files['blog/index.html'].should.have.property('posts');
-      files['blog/index.html']['posts'].should.have.length(3);
+      page()(this.files, metalsmith);
+      this.files.should.have.property('blog/index.html');
+      this.files['blog/index.html'].should.have.property('prev', null);
+      this.files['blog/index.html'].should.have.property('next', 2);
+      this.files['blog/index.html'].should.have.property('target', 'blog');
+      this.files['blog/index.html'].should.have.property('template', 'page');
+      this.files['blog/index.html'].should.have.property('contents');
+      this.files['blog/index.html']['contents'].should.be.type('object');
+      this.files['blog/index.html'].should.have.property('posts');
+      this.files['blog/index.html']['posts'].should.have.length(3);
 
-      files.should.have.property('blog/2/index.html');
-      files['blog/2/index.html'].should.have.property('prev', 1);
-      files['blog/2/index.html'].should.have.property('next', null);
-      files['blog/2/index.html'].should.have.property('posts');
-      files['blog/2/index.html']['posts'].should.have.length(1);
+      this.files.should.have.property('blog/2/index.html');
+      this.files['blog/2/index.html'].should.have.property('prev', 1);
+      this.files['blog/2/index.html'].should.have.property('next', null);
+      this.files['blog/2/index.html'].should.have.property('posts');
+      this.files['blog/2/index.html']['posts'].should.have.length(1);
 
-      files['blog/index.html'].posts[0].should.have.property('date', '2015-01-01');
-      files['blog/index.html'].posts[0].should.have.property('title', 'Post 1');
-      files['blog/index.html'].posts[0].should.have.property('date_string', '2015-01-01');
+      this.files['blog/index.html'].posts[0].should.have.property('date', '2015-01-01');
+      this.files['blog/index.html'].posts[0].should.have.property('title', 'Post 1');
+      this.files['blog/index.html'].posts[0].should.have.property('date_string', '2015-01-01');
 
-      files['blog/index.html'].posts[1].should.have.property('date', '2015-01-02');
-      files['blog/index.html'].posts[1].should.have.property('title', 'Post 2');
-      files['blog/index.html'].posts[1].should.have.property('date_string', '2015-01-02');
+      this.files['blog/index.html'].posts[1].should.have.property('date', '2015-01-02');
+      this.files['blog/index.html'].posts[1].should.have.property('title', 'Post 2');
+      this.files['blog/index.html'].posts[1].should.have.property('date_string', '2015-01-02');
 
-      files['blog/index.html'].posts[2].should.have.property('date', '2015-01-03');
-      files['blog/index.html'].posts[2].should.have.property('title', 'Post 3');
-      files['blog/index.html'].posts[2].should.have.property('date_string', '2015-01-03');
+      this.files['blog/index.html'].posts[2].should.have.property('date', '2015-01-03');
+      this.files['blog/index.html'].posts[2].should.have.property('title', 'Post 3');
+      this.files['blog/index.html'].posts[2].should.have.property('date_string', '2015-01-03');
 
-      files['blog/2/index.html'].posts[0].should.have.property('date', '2015-01-04');
-      files['blog/2/index.html'].posts[0].should.have.property('title', 'Post 4');
-      files['blog/2/index.html'].posts[0].should.have.property('date_string', '2015-01-04');
+      this.files['blog/2/index.html'].posts[0].should.have.property('date', '2015-01-04');
+      this.files['blog/2/index.html'].posts[0].should.have.property('title', 'Post 4');
+      this.files['blog/2/index.html'].posts[0].should.have.property('date_string', '2015-01-04');
 
     });
 
     it('pages the links properly', function() {
 
-      page({perPage: 1})(files, metalsmith);
-      files.should.have.property('blog/index.html');
-      files['blog/index.html'].should.have.property('prev', null);
-      files['blog/index.html'].should.have.property('next', 2);
+      page({perPage: 1})(this.files, metalsmith);
+      this.files.should.have.property('blog/index.html');
+      this.files['blog/index.html'].should.have.property('prev', null);
+      this.files['blog/index.html'].should.have.property('next', 2);
 
-      files.should.have.property('blog/2/index.html');
-      files['blog/2/index.html'].should.have.property('prev', 1);
-      files['blog/2/index.html'].should.have.property('next', 3);
+      this.files.should.have.property('blog/2/index.html');
+      this.files['blog/2/index.html'].should.have.property('prev', 1);
+      this.files['blog/2/index.html'].should.have.property('next', 3);
 
-      files.should.have.property('blog/3/index.html');
-      files['blog/3/index.html'].should.have.property('prev', 2);
-      files['blog/3/index.html'].should.have.property('next', 4);
+      this.files.should.have.property('blog/3/index.html');
+      this.files['blog/3/index.html'].should.have.property('prev', 2);
+      this.files['blog/3/index.html'].should.have.property('next', 4);
 
-      files.should.have.property('blog/4/index.html');
-      files['blog/4/index.html'].should.have.property('prev', 3);
-      files['blog/4/index.html'].should.have.property('next', null);
+      this.files.should.have.property('blog/4/index.html');
+      this.files['blog/4/index.html'].should.have.property('prev', 3);
+      this.files['blog/4/index.html'].should.have.property('next', null);
 
     });
 
@@ -182,71 +180,71 @@ describe('Middlware', function() {
       metalsmith._metadata['boops'] = metalsmith._metadata['posts'];
       delete metalsmith._metadata['posts'];
 
-      page({collection: 'boops'})(files, metalsmith);
-      files.should.have.property('blog/index.html');
-      files.should.have.property('blog/2/index.html');
+      page({collection: 'boops'})(this.files, metalsmith);
+      this.files.should.have.property('blog/index.html');
+      this.files.should.have.property('blog/2/index.html');
 
     });
 
     it('lets me change targets', function() {
 
-      page({target: 'boops'})(files, metalsmith);
-      files.should.have.property('boops/index.html');
-      files.should.have.property('boops/2/index.html');
+      page({target: 'boops'})(this.files, metalsmith);
+      this.files.should.have.property('boops/index.html');
+      this.files.should.have.property('boops/2/index.html');
 
     });
 
 
     it('lets me change templates', function() {
 
-      page({template: 'boops'})(files, metalsmith);
-      files.should.have.property('blog/index.html');
-      files['blog/index.html'].should.have.property('template', 'boops');
-      files.should.have.property('blog/2/index.html');
-      files['blog/2/index.html'].should.have.property('template', 'boops');
+      page({template: 'boops'})(this.files, metalsmith);
+      this.files.should.have.property('blog/index.html');
+      this.files['blog/index.html'].should.have.property('template', 'boops');
+      this.files.should.have.property('blog/2/index.html');
+      this.files['blog/2/index.html'].should.have.property('template', 'boops');
 
     });
 
     it('lets me create permalinks', function() {
 
-      page({perma: 'true'})(files, metalsmith);
-      files.should.have.property('blog/index.html');
-      files.should.have.property('blog/2/index.html');
+      page({perma: 'true'})(this.files, metalsmith);
+      this.files.should.have.property('blog/index.html');
+      this.files.should.have.property('blog/2/index.html');
 
-      files.should.have.property('blog/archive/a52dc9c71d83643d76dfd94d911475c3aa3e29b0/index.html');
-      files['blog/archive/a52dc9c71d83643d76dfd94d911475c3aa3e29b0/index.html'].should.have.property('template', 'page');
-      files['blog/archive/a52dc9c71d83643d76dfd94d911475c3aa3e29b0/index.html'].should.have.property('prev', null);
-      files['blog/archive/a52dc9c71d83643d76dfd94d911475c3aa3e29b0/index.html'].should.have.property('next', null);
-      files['blog/archive/a52dc9c71d83643d76dfd94d911475c3aa3e29b0/index.html'].should.have.property('contents')
-      files['blog/archive/a52dc9c71d83643d76dfd94d911475c3aa3e29b0/index.html']['contents'].should.be.type('object');
+      this.files.should.have.property('blog/archive/a52dc9c71d83643d76dfd94d911475c3aa3e29b0/index.html');
+      this.files['blog/archive/a52dc9c71d83643d76dfd94d911475c3aa3e29b0/index.html'].should.have.property('template', 'page');
+      this.files['blog/archive/a52dc9c71d83643d76dfd94d911475c3aa3e29b0/index.html'].should.have.property('prev', null);
+      this.files['blog/archive/a52dc9c71d83643d76dfd94d911475c3aa3e29b0/index.html'].should.have.property('next', null);
+      this.files['blog/archive/a52dc9c71d83643d76dfd94d911475c3aa3e29b0/index.html'].should.have.property('contents')
+      this.files['blog/archive/a52dc9c71d83643d76dfd94d911475c3aa3e29b0/index.html']['contents'].should.be.type('object');
 
-      files.should.have.property('blog/archive/0e8a3466832ec5cebefd8cc299e240383be38177/index.html');
-      files['blog/archive/0e8a3466832ec5cebefd8cc299e240383be38177/index.html'].should.have.property('template', 'page');
-      files['blog/archive/0e8a3466832ec5cebefd8cc299e240383be38177/index.html'].should.have.property('prev', null);
-      files['blog/archive/0e8a3466832ec5cebefd8cc299e240383be38177/index.html'].should.have.property('next', null);
-      files['blog/archive/0e8a3466832ec5cebefd8cc299e240383be38177/index.html'].should.have.property('contents')
-      files['blog/archive/0e8a3466832ec5cebefd8cc299e240383be38177/index.html']['contents'].should.be.type('object');
-
-
-      files.should.have.property('blog/archive/90c5cd937ff6c221a14b89799c4c541ad6cf1e0a/index.html');
-      files['blog/archive/90c5cd937ff6c221a14b89799c4c541ad6cf1e0a/index.html'].should.have.property('template', 'page');
-      files['blog/archive/90c5cd937ff6c221a14b89799c4c541ad6cf1e0a/index.html'].should.have.property('prev', null);
-      files['blog/archive/90c5cd937ff6c221a14b89799c4c541ad6cf1e0a/index.html'].should.have.property('next', null);
-      files['blog/archive/90c5cd937ff6c221a14b89799c4c541ad6cf1e0a/index.html'].should.have.property('contents')
-      files['blog/archive/90c5cd937ff6c221a14b89799c4c541ad6cf1e0a/index.html']['contents'].should.be.type('object');
+      this.files.should.have.property('blog/archive/0e8a3466832ec5cebefd8cc299e240383be38177/index.html');
+      this.files['blog/archive/0e8a3466832ec5cebefd8cc299e240383be38177/index.html'].should.have.property('template', 'page');
+      this.files['blog/archive/0e8a3466832ec5cebefd8cc299e240383be38177/index.html'].should.have.property('prev', null);
+      this.files['blog/archive/0e8a3466832ec5cebefd8cc299e240383be38177/index.html'].should.have.property('next', null);
+      this.files['blog/archive/0e8a3466832ec5cebefd8cc299e240383be38177/index.html'].should.have.property('contents')
+      this.files['blog/archive/0e8a3466832ec5cebefd8cc299e240383be38177/index.html']['contents'].should.be.type('object');
 
 
-      files.should.have.property('blog/archive/b515c81d47640fb1d19b6441e7902e37070b2dc6/index.html');
-      files['blog/archive/b515c81d47640fb1d19b6441e7902e37070b2dc6/index.html'].should.have.property('template', 'page');
-      files['blog/archive/b515c81d47640fb1d19b6441e7902e37070b2dc6/index.html'].should.have.property('prev', null);
-      files['blog/archive/b515c81d47640fb1d19b6441e7902e37070b2dc6/index.html'].should.have.property('next', null);
-      files['blog/archive/b515c81d47640fb1d19b6441e7902e37070b2dc6/index.html'].should.have.property('contents')
-      files['blog/archive/b515c81d47640fb1d19b6441e7902e37070b2dc6/index.html']['contents'].should.be.type('object');
+      this.files.should.have.property('blog/archive/90c5cd937ff6c221a14b89799c4c541ad6cf1e0a/index.html');
+      this.files['blog/archive/90c5cd937ff6c221a14b89799c4c541ad6cf1e0a/index.html'].should.have.property('template', 'page');
+      this.files['blog/archive/90c5cd937ff6c221a14b89799c4c541ad6cf1e0a/index.html'].should.have.property('prev', null);
+      this.files['blog/archive/90c5cd937ff6c221a14b89799c4c541ad6cf1e0a/index.html'].should.have.property('next', null);
+      this.files['blog/archive/90c5cd937ff6c221a14b89799c4c541ad6cf1e0a/index.html'].should.have.property('contents')
+      this.files['blog/archive/90c5cd937ff6c221a14b89799c4c541ad6cf1e0a/index.html']['contents'].should.be.type('object');
 
-      files['blog/index.html']['posts'][0].should.have.property('perma_link', '/blog/archive/a52dc9c71d83643d76dfd94d911475c3aa3e29b0');
-      files['blog/index.html']['posts'][1].should.have.property('perma_link', '/blog/archive/0e8a3466832ec5cebefd8cc299e240383be38177');
-      files['blog/index.html']['posts'][2].should.have.property('perma_link', '/blog/archive/90c5cd937ff6c221a14b89799c4c541ad6cf1e0a');
-      files['blog/2/index.html']['posts'][0].should.have.property('perma_link', '/blog/archive/b515c81d47640fb1d19b6441e7902e37070b2dc6');
+
+      this.files.should.have.property('blog/archive/b515c81d47640fb1d19b6441e7902e37070b2dc6/index.html');
+      this.files['blog/archive/b515c81d47640fb1d19b6441e7902e37070b2dc6/index.html'].should.have.property('template', 'page');
+      this.files['blog/archive/b515c81d47640fb1d19b6441e7902e37070b2dc6/index.html'].should.have.property('prev', null);
+      this.files['blog/archive/b515c81d47640fb1d19b6441e7902e37070b2dc6/index.html'].should.have.property('next', null);
+      this.files['blog/archive/b515c81d47640fb1d19b6441e7902e37070b2dc6/index.html'].should.have.property('contents')
+      this.files['blog/archive/b515c81d47640fb1d19b6441e7902e37070b2dc6/index.html']['contents'].should.be.type('object');
+
+      this.files['blog/index.html']['posts'][0].should.have.property('perma_link', '/blog/archive/a52dc9c71d83643d76dfd94d911475c3aa3e29b0');
+      this.files['blog/index.html']['posts'][1].should.have.property('perma_link', '/blog/archive/0e8a3466832ec5cebefd8cc299e240383be38177');
+      this.files['blog/index.html']['posts'][2].should.have.property('perma_link', '/blog/archive/90c5cd937ff6c221a14b89799c4c541ad6cf1e0a');
+      this.files['blog/2/index.html']['posts'][0].should.have.property('perma_link', '/blog/archive/b515c81d47640fb1d19b6441e7902e37070b2dc6');
 
     });
 
@@ -263,19 +261,19 @@ describe('Middlware', function() {
         }
      };
 
-      page()(files, metalsmith);
+      page()(this.files, metalsmith);
 
-      files['blog/index.html'].posts[0]['date'].should.be.type('object');
-      files['blog/index.html'].posts[0].should.have.property('date_string', '2015-01-01');
+      this.files['blog/index.html'].posts[0]['date'].should.be.type('object');
+      this.files['blog/index.html'].posts[0].should.have.property('date_string', '2015-01-01');
 
-      files['blog/index.html'].posts[1]['date'].should.be.type('object');
-      files['blog/index.html'].posts[1].should.have.property('date_string', '2015-01-02');
+      this.files['blog/index.html'].posts[1]['date'].should.be.type('object');
+      this.files['blog/index.html'].posts[1].should.have.property('date_string', '2015-01-02');
 
-      files['blog/index.html'].posts[2]['date'].should.be.type('object');
-      files['blog/index.html'].posts[2].should.have.property('date_string', '2015-01-03');
+      this.files['blog/index.html'].posts[2]['date'].should.be.type('object');
+      this.files['blog/index.html'].posts[2].should.have.property('date_string', '2015-01-03');
 
-      files['blog/2/index.html'].posts[0]['date'].should.be.type('object');
-      files['blog/2/index.html'].posts[0].should.have.property('date_string', '2015-01-04');
+      this.files['blog/2/index.html'].posts[0]['date'].should.be.type('object');
+      this.files['blog/2/index.html'].posts[0].should.have.property('date_string', '2015-01-04');
 
     });
 
@@ -285,14 +283,14 @@ describe('Middlware', function() {
 
     it('exposes partials', function() {
 
-      files['d.html'] = {partial: 'd', contents: 'bloop'};
-      partial()(files);
-      files.should.not.have.property('d.html');
-      files['b.html'].should.have.property('d', 'bloop');
-      files['a/b.html'].should.have.property('d', 'bloop');
-      files['a/c.html'].should.have.property('d', 'bloop');
-      files['a/b.css'].should.not.have.property('d', 'bloop');
-      files['a/d/e.js'].should.not.have.property('d', 'bloop');
+      this.files['d.html'] = {partial: 'd', contents: 'bloop'};
+      partial()(this.files);
+      this.files.should.not.have.property('d.html');
+      this.files['b.html'].should.have.property('d', 'bloop');
+      this.files['a/b.html'].should.have.property('d', 'bloop');
+      this.files['a/c.html'].should.have.property('d', 'bloop');
+      this.files['a/b.css'].should.not.have.property('d', 'bloop');
+      this.files['a/d/e.js'].should.not.have.property('d', 'bloop');
 
     });
 
@@ -301,63 +299,63 @@ describe('Middlware', function() {
   describe('row', function() {
 
     it('Adds rows', function() {
-      files['row1.html'] = {contents: 'bleep'};
-      files['row2.html'] = {contents: 'bloop'};
-      files['d.html'] =  {rows: 'row1, row2'};
-      row()(files)
+      this.files['row1.html'] = {contents: 'bleep'};
+      this.files['row2.html'] = {contents: 'bloop'};
+      this.files['d.html'] =  {rows: 'row1, row2'};
+      row()(this.files)
 
-      files.should.not.have.property('row1.html');
-      files.should.not.have.property('row2.html');
-      files.should.have.property('d.html');
-      files['d.html'].rows.should.have.length(2);
-      files['d.html'].rows[0].should.have.property('contents', 'bleep');
-      files['d.html'].rows[0].should.have.property('two_column', false);
-      files['d.html'].rows[1].should.have.property('contents', 'bloop');
-      files['d.html'].rows[1].should.have.property('two_column', false);
+      this.files.should.not.have.property('row1.html');
+      this.files.should.not.have.property('row2.html');
+      this.files.should.have.property('d.html');
+      this.files['d.html'].rows.should.have.length(2);
+      this.files['d.html'].rows[0].should.have.property('contents', 'bleep');
+      this.files['d.html'].rows[0].should.have.property('two_column', false);
+      this.files['d.html'].rows[1].should.have.property('contents', 'bloop');
+      this.files['d.html'].rows[1].should.have.property('two_column', false);
     });
 
-    it('Adds rows even when files mismatch', function() {
-      files['row1.html'] = {contents: 'bleep'};
-      files['row2.html'] = {contents: 'bloop'};
-      files['d.html'] =  {rows: 'row1, row2, row3'};
+    it('Adds rows even when this.files mismatch', function() {
+      this.files['row1.html'] = {contents: 'bleep'};
+      this.files['row2.html'] = {contents: 'bloop'};
+      this.files['d.html'] =  {rows: 'row1, row2, row3'};
 
-      row()(files)
+      row()(this.files)
 
-      files.should.have.property('d.html');
-      files['d.html'].rows.should.have.length(3);
-      files['d.html'].rows[2].should.have.property('contents', undefined);
+      this.files.should.have.property('d.html');
+      this.files['d.html'].rows.should.have.length(3);
+      this.files['d.html'].rows[2].should.have.property('contents', undefined);
     });
 
     it('supports two-col layouts', function() {
-      files['row1-left.html'] = {contents: 'bloop-left'}
-      files['row1-right.html'] = {contents: 'bloop-right'}
-      files['row1.html'] = {contents: 'bleep', left: 'row1-left', right: 'row1-right'};
-      files['d.html'] =  {rows: 'row1'};
-      row()(files)
+      this.files['row1-left.html'] = {contents: 'bloop-left'}
+      this.files['row1-right.html'] = {contents: 'bloop-right'}
+      this.files['row1.html'] = {contents: 'bleep', left: 'row1-left', right: 'row1-right'};
+      this.files['d.html'] =  {rows: 'row1'};
+      row()(this.files)
 
-      files.should.not.have.property('row1.html');
-      files.should.have.property('d.html');
-      files['d.html'].rows.should.have.length(1);
-      files['d.html'].rows[0].should.have.property('contents', 'bleep');
-      files['d.html'].rows[0].should.have.property('two_column', true);
-      files['d.html'].rows[0].should.have.property('left', 'row1-left');
-      files['d.html'].rows[0].should.have.property('right', 'row1-right');
+      this.files.should.not.have.property('row1.html');
+      this.files.should.have.property('d.html');
+      this.files['d.html'].rows.should.have.length(1);
+      this.files['d.html'].rows[0].should.have.property('contents', 'bleep');
+      this.files['d.html'].rows[0].should.have.property('two_column', true);
+      this.files['d.html'].rows[0].should.have.property('left', 'row1-left');
+      this.files['d.html'].rows[0].should.have.property('right', 'row1-right');
     });
 
     it('must have a left and right col', function() {
-      files['row1-left.html'] = {contents: 'bloop-left'}
-      files['row1-right.html'] = {contents: 'bloop-right'}
-      files['row1.html'] = {contents: 'bleep', left: 'row1-left'};
-      files['d.html'] =  {rows: 'row1'};
-      row()(files)
+      this.files['row1-left.html'] = {contents: 'bloop-left'}
+      this.files['row1-right.html'] = {contents: 'bloop-right'}
+      this.files['row1.html'] = {contents: 'bleep', left: 'row1-left'};
+      this.files['d.html'] =  {rows: 'row1'};
+      row()(this.files)
 
-      files.should.not.have.property('row1.html');
-      files.should.have.property('d.html');
-      files['d.html'].rows.should.have.length(1);
-      files['d.html'].rows[0].should.have.property('contents', 'bleep');
-      files['d.html'].rows[0].should.have.property('two_column', false);
-      files['d.html'].rows[0].should.not.have.property('left');
-      files['d.html'].rows[0].should.not.have.property('right');
+      this.files.should.not.have.property('row1.html');
+      this.files.should.have.property('d.html');
+      this.files['d.html'].rows.should.have.length(1);
+      this.files['d.html'].rows[0].should.have.property('contents', 'bleep');
+      this.files['d.html'].rows[0].should.have.property('two_column', false);
+      this.files['d.html'].rows[0].should.not.have.property('left');
+      this.files['d.html'].rows[0].should.not.have.property('right');
     });
 
   });
@@ -365,25 +363,25 @@ describe('Middlware', function() {
   describe('two_column', function() {
 
     it('supports two columns', function() {
-      files['left.html'] = {contents: 'bleep'};
-      files['right.html'] = {contents: 'bloop'};
-      files['d.html'] =  {left: 'left', right: 'right'};
+      this.files['left.html'] = {contents: 'bleep'};
+      this.files['right.html'] = {contents: 'bloop'};
+      this.files['d.html'] =  {left: 'left', right: 'right'};
 
-      two_column()(files)
-      files.should.have.property('d.html');
-      files.should.not.have.property('left.html');
-      files.should.not.have.property('right.html');
-      files['d.html'].should.have.property('left', 'bleep');
-      files['d.html'].should.have.property('right', 'bloop');
+      two_column()(this.files)
+      this.files.should.have.property('d.html');
+      this.files.should.not.have.property('left.html');
+      this.files.should.not.have.property('right.html');
+      this.files['d.html'].should.have.property('left', 'bleep');
+      this.files['d.html'].should.have.property('right', 'bloop');
     });
 
     it('must have two columns', function() {
-      files['left.html'] = {contents: 'bleep'};
-      files['d.html'] =  {left: 'left'};
+      this.files['left.html'] = {contents: 'bleep'};
+      this.files['d.html'] =  {left: 'left'};
 
-      two_column()(files)
-      files.should.have.property('d.html');
-      files.should.have.property('left.html');
+      two_column()(this.files)
+      this.files.should.have.property('d.html');
+      this.files.should.have.property('left.html');
     });
 
   });
@@ -391,21 +389,21 @@ describe('Middlware', function() {
   describe('wrap', function() {
 
     it('wraps', function() {
-      files['d.html'] = {contents: new Buffer('bleep'), wrap: 'bloop'}
+      this.files['d.html'] = {contents: new Buffer('bleep'), wrap: 'bloop'}
 
-      wrap()(files)
-      files.should.have.property('d.html');
-      files['d.html'].should.have.property('contents');
-      files['d.html']['contents'].toString().should.be.equal('<div class="bloop">bleep</div>');
+      wrap()(this.files)
+      this.files.should.have.property('d.html');
+      this.files['d.html'].should.have.property('contents');
+      this.files['d.html']['contents'].toString().should.be.equal('<div class="bloop">bleep</div>');
     });
 
     it('wraps empty', function() {
-      files['d.html'] = {contents: new Buffer('bleep'), wrap: ''}
+      this.files['d.html'] = {contents: new Buffer('bleep'), wrap: ''}
 
-      wrap()(files)
-      files.should.have.property('d.html');
-      files['d.html'].should.have.property('contents');
-      files['d.html']['contents'].toString().should.be.equal('<div class="">bleep</div>');
+      wrap()(this.files)
+      this.files.should.have.property('d.html');
+      this.files['d.html'].should.have.property('contents');
+      this.files['d.html']['contents'].toString().should.be.equal('<div class="">bleep</div>');
     });
 
   });

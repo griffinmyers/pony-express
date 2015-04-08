@@ -4,10 +4,8 @@ var Store = require('../../lib/store.js');
 
 describe('Store', function() {
 
-  var store;
-
   beforeEach(function() {
-    store = new Store('bucket', true);
+    this.store = new Store('bucket', true);
   });
 
   describe('get', function() {
@@ -18,7 +16,7 @@ describe('Store', function() {
         .get('/boop')
         .reply(200, 'bleep');
 
-      store.get('boop').then(function(res) {
+      this.store.get('boop').then(function(res) {
         res.Body.toString().should.be.exactly('bleep');
         amazon.done();
         done();
@@ -32,12 +30,12 @@ describe('Store', function() {
         .get('/boop')
         .reply(200, 'bleep');
 
-      store.get('boop').then(function(res) {
+      this.store.get('boop').then(function(res) {
         res.Body.toString().should.be.exactly('bleep');
         amazon.done();
       }).then(function() {
-        return store.get('boop');
-      }).then(function(res) {
+        return this.store.get('boop');
+      }.bind(this)).then(function(res) {
         res.Body.toString().should.be.exactly('bleep');
         done();
       }, done).done();
@@ -74,7 +72,7 @@ describe('Store', function() {
         .put('/boop', 'bleep')
         .reply(200);
 
-      store.put('boop', 'bleep').then(function() {
+      this.store.put('boop', 'bleep').then(function() {
         amazon.done();
         done();
       }, done).done();
