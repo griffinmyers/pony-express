@@ -7,7 +7,6 @@ var nock = require('nock');
 nock.enableNetConnect('127.0.0.1');
 
 describe('App', function() {
-
   describe('GET /', function(){
     it('responds', function(done){
       request(app)
@@ -37,7 +36,6 @@ describe('App', function() {
 
   describe('GET /authorize/redirect', function () {
     it('makes the auth call to dropbox and stores the key', function(done) {
-
       var secret = 'secret';
       var key = 'key';
       var code = '1234';
@@ -70,7 +68,7 @@ describe('App', function() {
         .expect(200, function() {
           dropbox.done();
           s3.done();
-          done()
+          done();
         });
     });
   });
@@ -78,13 +76,7 @@ describe('App', function() {
   describe('GET /authorize/redirect', function () {
     it('throws if there is an error with dropbox', function(done) {
 
-      var secret = 'secret';
-      var key = 'key';
       var code = '1234';
-
-      process.env.DROPBOX_APP_KEY = key;
-      process.env.DROPBOX_APP_SECRET = secret;
-
       var dropbox = nock('https://api.dropbox.com')
         .post('/1/oauth2/token')
         .reply(500, {error: 500, error_description: 'Nope'});
@@ -93,10 +85,9 @@ describe('App', function() {
         .get('/authorize/redirect?code=' + code)
         .expect(500, function() {
           dropbox.done();
-          done()
+          done();
         });
     });
   });
-
 });
 

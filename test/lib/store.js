@@ -9,9 +9,7 @@ describe('Store', function() {
   });
 
   describe('get', function() {
-
     it('gets something', function(done) {
-
       var amazon = nock('https://bucket.s3.amazonaws.com:443')
         .get('/boop')
         .reply(200, 'bleep');
@@ -21,11 +19,9 @@ describe('Store', function() {
         amazon.done();
         done();
       }, done).done();
-
     });
 
     it('caches', function(done) {
-
       var amazon = nock('https://bucket.s3.amazonaws.com:443')
         .get('/boop')
         .reply(200, 'bleep');
@@ -39,11 +35,9 @@ describe('Store', function() {
         res.Body.toString().should.be.exactly('bleep');
         done();
       }, done).done();
-
     });
 
     it('can not cache', function(done) {
-
     var uncached_store = new Store('bucket');
     var amazon = nock('https://bucket.s3.amazonaws.com:443')
       .get('/boop')
@@ -59,15 +53,11 @@ describe('Store', function() {
         amazon.done();
         done()
       }, done).done();
-
     });
-
   });
 
   describe('put', function() {
-
     it('puts something', function(done) {
-
       var amazon = nock('https://bucket.s3.amazonaws.com:443')
         .put('/boop', 'bleep')
         .reply(200);
@@ -76,10 +66,6 @@ describe('Store', function() {
         amazon.done();
         done();
       }, done).done();
-
     });
-
   });
-
 });
-

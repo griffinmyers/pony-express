@@ -2,7 +2,6 @@ var path = require('path');
 var should = require('should');
 
 describe('Config', function(){
-
   describe('default', function() {
     it('loads the default config', function() {
       var c = require('../config');
@@ -18,5 +17,4 @@ describe('Config', function(){
       c.redirect_uri.should.be.exactly('https://ponyexprss.com/authorize/redirect');
     });
   });
-
 });

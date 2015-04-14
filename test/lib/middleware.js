@@ -11,7 +11,6 @@ var two_column = middleware.two_column;
 var wrap = middleware.wrap;
 
 describe('Middlware', function() {
-
   beforeEach(function() {
     this.files = {
       'b.html': {template: 'page'},
@@ -23,7 +22,6 @@ describe('Middlware', function() {
   });
 
   describe('bind_template()', function() {
-
     it('adds .jade to html', function() {
       bind_template()(this.files);
       this.files['b.html'].should.have.property('template', 'page.jade');
@@ -39,11 +37,9 @@ describe('Middlware', function() {
       bind_template()(this.files);
       this.files['a/b.css'].should.be.empty;
     });
-
   });
 
   describe('clean()', function() {
-
     it('removes this.files', function() {
       clean('b.html')(this.files);
       this.files.should.not.have.property('b.html');
@@ -59,7 +55,6 @@ describe('Middlware', function() {
       this.files.should.not.have.property('a/c.html');
       this.files.should.not.have.property('a/b.css');
     });
-
   });
 
   describe('expose()', function() {
@@ -70,7 +65,6 @@ describe('Middlware', function() {
   });
 
   describe('move()', function() {
-
     it('moves this.files', function() {
       move({source: 'a', destination: 'c'})(this.files)
       this.files.should.have.property('b.html');
@@ -97,15 +91,11 @@ describe('Middlware', function() {
       move({source: 'a/b.html', destination: 'a/c.html'})(this.files);
       this.files.should.containDeep({'a/c.html': {template: 'page'}});
     });
-
   });
 
   describe('page()', function() {
-
-    var metalsmith;
-
     beforeEach(function() {
-      metalsmith = {
+      this.metalsmith = {
         '_metadata': {
           'posts': [
             {date: '2015-01-01', title: 'Post 1'},
@@ -114,12 +104,11 @@ describe('Middlware', function() {
             {date: '2015-01-04', title: 'Post 4'}
           ]
         }
-     };
+      };
     });
 
     it('pages', function() {
-
-      page()(this.files, metalsmith);
+      page()(this.files, this.metalsmith);
       this.files.should.have.property('blog/index.html');
       this.files['blog/index.html'].should.have.property('prev', null);
       this.files['blog/index.html'].should.have.property('next', 2);
@@ -151,12 +140,10 @@ describe('Middlware', function() {
       this.files['blog/2/index.html'].posts[0].should.have.property('date', '2015-01-04');
       this.files['blog/2/index.html'].posts[0].should.have.property('title', 'Post 4');
       this.files['blog/2/index.html'].posts[0].should.have.property('date_string', '2015-01-04');
-
     });
 
     it('pages the links properly', function() {
-
-      page({perPage: 1})(this.files, metalsmith);
+      page({perPage: 1})(this.files, this.metalsmith);
       this.files.should.have.property('blog/index.html');
       this.files['blog/index.html'].should.have.property('prev', null);
       this.files['blog/index.html'].should.have.property('next', 2);
@@ -172,42 +159,34 @@ describe('Middlware', function() {
       this.files.should.have.property('blog/4/index.html');
       this.files['blog/4/index.html'].should.have.property('prev', 3);
       this.files['blog/4/index.html'].should.have.property('next', null);
-
     });
 
     it('lets me change collections', function() {
+      this.metalsmith._metadata['boops'] = this.metalsmith._metadata['posts'];
+      delete this.metalsmith._metadata['posts'];
 
-      metalsmith._metadata['boops'] = metalsmith._metadata['posts'];
-      delete metalsmith._metadata['posts'];
-
-      page({collection: 'boops'})(this.files, metalsmith);
+      page({collection: 'boops'})(this.files, this.metalsmith);
       this.files.should.have.property('blog/index.html');
       this.files.should.have.property('blog/2/index.html');
-
     });
 
     it('lets me change targets', function() {
-
-      page({target: 'boops'})(this.files, metalsmith);
+      page({target: 'boops'})(this.files, this.metalsmith);
       this.files.should.have.property('boops/index.html');
       this.files.should.have.property('boops/2/index.html');
-
     });
 
 
     it('lets me change templates', function() {
-
-      page({template: 'boops'})(this.files, metalsmith);
+      page({template: 'boops'})(this.files, this.metalsmith);
       this.files.should.have.property('blog/index.html');
       this.files['blog/index.html'].should.have.property('template', 'boops');
       this.files.should.have.property('blog/2/index.html');
       this.files['blog/2/index.html'].should.have.property('template', 'boops');
-
     });
 
     it('lets me create permalinks', function() {
-
-      page({perma: 'true'})(this.files, metalsmith);
+      page({perma: 'true'})(this.files, this.metalsmith);
       this.files.should.have.property('blog/index.html');
       this.files.should.have.property('blog/2/index.html');
 
@@ -245,11 +224,9 @@ describe('Middlware', function() {
       this.files['blog/index.html']['posts'][1].should.have.property('perma_link', '/blog/archive/0e8a3466832ec5cebefd8cc299e240383be38177');
       this.files['blog/index.html']['posts'][2].should.have.property('perma_link', '/blog/archive/90c5cd937ff6c221a14b89799c4c541ad6cf1e0a');
       this.files['blog/2/index.html']['posts'][0].should.have.property('perma_link', '/blog/archive/b515c81d47640fb1d19b6441e7902e37070b2dc6');
-
     });
 
     it('deals with parsed dates', function() {
-
       metalsmith = {
         '_metadata': {
           'posts': [
@@ -274,15 +251,11 @@ describe('Middlware', function() {
 
       this.files['blog/2/index.html'].posts[0]['date'].should.be.type('object');
       this.files['blog/2/index.html'].posts[0].should.have.property('date_string', '2015-01-04');
-
     });
-
   });
 
   describe('partial()', function() {
-
     it('exposes partials', function() {
-
       this.files['d.html'] = {partial: 'd', contents: 'bloop'};
       partial()(this.files);
       this.files.should.not.have.property('d.html');
@@ -293,11 +266,9 @@ describe('Middlware', function() {
       this.files['a/d/e.js'].should.not.have.property('d', 'bloop');
 
     });
-
   });
 
   describe('row', function() {
-
     it('Adds rows', function() {
       this.files['row1.html'] = {contents: 'bleep'};
       this.files['row2.html'] = {contents: 'bloop'};
@@ -357,11 +328,9 @@ describe('Middlware', function() {
       this.files['d.html'].rows[0].should.not.have.property('left');
       this.files['d.html'].rows[0].should.not.have.property('right');
     });
-
   });
 
   describe('two_column', function() {
-
     it('supports two columns', function() {
       this.files['left.html'] = {contents: 'bleep'};
       this.files['right.html'] = {contents: 'bloop'};
@@ -383,11 +352,9 @@ describe('Middlware', function() {
       this.files.should.have.property('d.html');
       this.files.should.have.property('left.html');
     });
-
   });
 
   describe('wrap', function() {
-
     it('wraps', function() {
       this.files['d.html'] = {contents: new Buffer('bleep'), wrap: 'bloop'}
 
@@ -405,8 +372,5 @@ describe('Middlware', function() {
       this.files['d.html'].should.have.property('contents');
       this.files['d.html']['contents'].toString().should.be.equal('<div class="">bleep</div>');
     });
-
   });
-
-
 });
