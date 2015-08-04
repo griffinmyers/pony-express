@@ -93,5 +93,22 @@ module.exports = {
         {name: 'clean', args: '.pony-token'}
       ];
     }
+  },
+  dev: {
+    bucket: 'brandonkreitler.com',
+    middleware: function(source) {
+      return [
+        {name: 'asset', args: {src: 'images', dest: 'images'}},
+        {name: 'asset', args: {src: 'fonts', dest: 'fonts'}},
+        {name: 'markdown', args: {gfm: true, tables: true, breaks: false, pedantic: false, sanitize: false, smartLists: true, smartypants: true}},
+        {name: 'bind_template'},
+        {name: 'partial'},
+        {name: 'templates', args: {engine: 'jade', directory: path.join(source, '_code', 'templates')}},
+        {name: 'sass', args: {outputDir: 'assets/css'}},
+        {name: 'move', args: {source: '_code/scripts', destination: 'assets/scripts'}},
+        {name: 'clean', args: '_code'},
+        {name: 'clean', args: '.pony-token'}
+      ]
+    }
   }
 };
