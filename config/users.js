@@ -111,7 +111,7 @@ module.exports = {
       ]
     }
   },
-  'cragcation': {
+  69161639: {
     bucket: 'cragcation.com',
     middleware: function(source) {
       return [
