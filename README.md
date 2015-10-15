@@ -30,6 +30,9 @@ Recap:
 * [wgm.cool](http://wgm.cool)
 * [joeshaner.com](http://joeshaner.com)
 * [fallcreekfarm.org](http://fallcreekfarm.org)
+* [ramblinrunner.com](http://ramblinrunner.com/)
+* [cragcation.com](http://cragcation.com/)
+* [brandonkreitler.com](http://brandonkreitler.com/)
 
 ### Running
 
