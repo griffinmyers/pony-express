@@ -65,7 +65,7 @@ Run the application and visit `/authorize` to get dropbox keys properly installe
 
 * Dropbox hits Pony Express up any time there's a change to the app folder. 
 * Pony Express fetches the files that have changed and rebuilds the website
-* Pony Express notces which build files have been changed, added, or deleted
+* Pony Express notices which build files have been changed, added, or deleted
   and pushes those changes to S3. 
 * S3 serves up the public-facing website. 
 
