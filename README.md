@@ -69,6 +69,12 @@ Run the application and visit `/authorize` to get dropbox keys properly installe
   and pushes those changes to S3. 
 * S3 serves up the public-facing website. 
 
+### Releasing
+
+* `git tag x.y.z`
+* `git push --tags`
+* `eb deploy -l x.y.z`
+
 ### Contributing
 
 * Fork
