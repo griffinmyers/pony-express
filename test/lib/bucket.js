@@ -73,7 +73,7 @@ describe('Bucket', function() {
 
   describe('put_remote_manifest()', function() {
     it('puts the manifest', function(done) {
-      var manifest = {'a':1,'b':2};
+      var manifest = {'a':1,'b': 2};
       var amazon = nock('https://remote.s3.amazonaws.com:443')
         .put('/.pony-manifest', JSON.stringify(manifest))
         .reply(200, '');
@@ -211,6 +211,163 @@ describe('Bucket', function() {
         done();
       }, done).done();
     });
+  });
+
+  describe.only('push()', function() {
+    before(function() {
+      mockfs({
+        'local/loveisall.jpg': new Buffer([8, 6, 7, 5, 3, 0, 9]),
+        'local/loveisall2.jpg': new Buffer([8, 6, 7, 5, 3, 0, 9]),
+        'local/local-only.gif': new Buffer([8, 6, 7, 5, 3, 0, 9])
+      });
+    });
+
+    it('reads local and remote manifests and pushes the logical diff', function(done) {
+      var remote_manifest = nock('https://remote.s3.amazonaws.com:443')
+        .get('/.pony-manifest')
+        .reply(200, {
+          'loveisall.jpg': '994a799d745100869cc0aaf2c09d2602d44b1c93',
+          'loveisall2.jpg': 2,
+          'remote-only.gif': 4
+        });
+
+      var del = nock('https://remote.s3.amazonaws.com:443')
+        .post('/?delete', '<Delete xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Object><Key>remote-only.gif</Key></Object></Delete>')
+        .reply(200, '<?xml version="1.0" encoding="UTF-8"?>\n<DeleteResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Deleted><Key>remote-only.gif</Key></Deleted></DeleteResult>')
+
+      var upload1 = nock('https://remote.s3.amazonaws.com:443')
+        .put('/loveisall2.jpg', '\b\u0006\u0007\u0005\u0003\u0000\t')
+        .reply(200, '');
+
+      var upload2 = nock('https://remote.s3.amazonaws.com:443')
+        .put('/local-only.gif', '\b\u0006\u0007\u0005\u0003\u0000\t')
+        .reply(200, '');
+
+      var put_manifest = nock('https://remote.s3.amazonaws.com:443')
+        .filteringRequestBody(function(body) {
+          var parsed = JSON.parse(body);
+          if(parsed.hasOwnProperty('local-only.gif') &&
+             parsed.hasOwnProperty('loveisall.jpg') &&
+             parsed.hasOwnProperty('loveisall2.jpg')) {
+            return '*';
+          }
+          else {
+            return '-';
+          }
+        })
+        .put('/.pony-manifest', '*')
+        .reply(200, '');
+
+      this.bucket.push().then(function() {
+        remote_manifest.done();
+        del.done();
+        upload1.done();
+        upload2.done();
+        put_manifest.done();
+        done();
+      }, done).done();
+
+    });
+
+    it('uploads everything if there was a problem getting the remote manifest', function(done) {
+      var remote_manifest = nock('https://remote.s3.amazonaws.com:443')
+        .get('/.pony-manifest')
+        .reply(404);
+
+      var list = nock('https://remote.s3.amazonaws.com:443')
+        .get('/')
+        .reply(200, '<?xml version="1.0" encoding="UTF-8"?><ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Name>remote</Name><Prefix></Prefix><Marker></Marker><MaxKeys>1000</MaxKeys><IsTruncated>false</IsTruncated><Contents><Key>index.html</Key></Contents><LastModified>2015-04-08T13:03:10.000Z</LastModified><ETag>&quot;58f62302b2e54b69f00360b0e84d6796&quot;</ETag><Size>940</Size><Owner><ID>65b749052bb8ea4df26271b212f78201abc29c23daaba7a05dc418f7fb5d053b</ID><DisplayName>griffin.myers</DisplayName></Owner><StorageClass>STANDARD</StorageClass></ListBucketResult>');
+
+      var del = nock('https://remote.s3.amazonaws.com:443')
+        .post('/?delete', '<Delete xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Object><Key>index.html</Key></Object></Delete>')
+        .reply(200, '<?xml version="1.0" encoding="UTF-8"?>\n<DeleteResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Deleted><Key>index.html</Key></Deleted></DeleteResult>')
+
+      var upload1 = nock('https://remote.s3.amazonaws.com:443')
+        .put('/loveisall2.jpg', '\b\u0006\u0007\u0005\u0003\u0000\t')
+        .reply(200, '');
+
+      var upload2 = nock('https://remote.s3.amazonaws.com:443')
+        .put('/local-only.gif', '\b\u0006\u0007\u0005\u0003\u0000\t')
+        .reply(200, '');
+
+      var upload3 = nock('https://remote.s3.amazonaws.com:443')
+        .put('/loveisall.jpg', '\b\u0006\u0007\u0005\u0003\u0000\t')
+        .reply(200, '');
+
+      var put_manifest = nock('https://remote.s3.amazonaws.com:443')
+        .filteringRequestBody(function(body) {
+          var parsed = JSON.parse(body);
+          if(parsed.hasOwnProperty('local-only.gif') &&
+             parsed.hasOwnProperty('loveisall.jpg') &&
+             parsed.hasOwnProperty('loveisall2.jpg')) {
+            return '*';
+          }
+          else {
+            return '-';
+          }
+        })
+        .put('/.pony-manifest', '*')
+        .reply(200, '');
+
+      this.bucket.push().then(function() {
+        remote_manifest.done();
+        list.done();
+        del.done();
+        upload1.done();
+        upload2.done();
+        upload3.done();
+        put_manifest.done();
+        done();
+      }, done).done();
+    });
+
+    it('clears the remote manifest if something fails', function(done) {
+      var remote_manifest = nock('https://remote.s3.amazonaws.com:443')
+        .get('/.pony-manifest')
+        .reply(404);
+
+      var list = nock('https://remote.s3.amazonaws.com:443')
+        .get('/')
+        .reply(200, '<?xml version="1.0" encoding="UTF-8"?><ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Name>remote</Name><Prefix></Prefix><Marker></Marker><MaxKeys>1000</MaxKeys><IsTruncated>false</IsTruncated><Contents><Key>index.html</Key></Contents><LastModified>2015-04-08T13:03:10.000Z</LastModified><ETag>&quot;58f62302b2e54b69f00360b0e84d6796&quot;</ETag><Size>940</Size><Owner><ID>65b749052bb8ea4df26271b212f78201abc29c23daaba7a05dc418f7fb5d053b</ID><DisplayName>griffin.myers</DisplayName></Owner><StorageClass>STANDARD</StorageClass></ListBucketResult>');
+
+      var del = nock('https://remote.s3.amazonaws.com:443')
+        .post('/?delete', '<Delete xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Object><Key>index.html</Key></Object></Delete>')
+        .reply(200, '<?xml version="1.0" encoding="UTF-8"?>\n<DeleteResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Deleted><Key>index.html</Key></Deleted></DeleteResult>')
+
+      var upload1 = nock('https://remote.s3.amazonaws.com:443')
+        .put('/loveisall2.jpg', '\b\u0006\u0007\u0005\u0003\u0000\t')
+        .reply(200, '');
+
+      var upload2 = nock('https://remote.s3.amazonaws.com:443')
+        .put('/local-only.gif', '\b\u0006\u0007\u0005\u0003\u0000\t')
+        .reply(200, '');
+
+      var upload3 = nock('https://remote.s3.amazonaws.com:443')
+        .put('/loveisall.jpg', '\b\u0006\u0007\u0005\u0003\u0000\t')
+        .reply(200, '');
+
+      var put_manifest = nock('https://remote.s3.amazonaws.com:443')
+        .filteringRequestBody(function(body) { return '*'; })
+        .put('/.pony-manifest', '*')
+        .reply(404);
+
+      var del_manifest = nock('https://remote.s3.amazonaws.com:443')
+        .post('/?delete', '<Delete xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Object><Key>.pony-manifest</Key></Object></Delete>')
+        .reply(200, '<?xml version="1.0" encoding="UTF-8"?>\n<DeleteResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Deleted><Key>.pony-manifest</Key></Deleted></DeleteResult>')
+
+      this.bucket.push().then(function() {
+        remote_manifest.done();
+        list.done();
+        del.done();
+        upload1.done();
+        upload2.done();
+        upload3.done();
+        put_manifest.done();
+        del_manifest.done();
+        done();
+      }, done).done();
+    });
+
   });
 
 });

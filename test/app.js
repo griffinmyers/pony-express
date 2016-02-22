@@ -13,7 +13,7 @@ describe('App', function() {
 
   after(function() {
     nock.cleanAll();
-    nock.enableNetConnect();
+    nock.disableNetConnect();
   })
 
   describe('GET /', function(){
