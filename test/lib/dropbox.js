@@ -257,4 +257,26 @@ describe('Dropbox', function() {
 
   });
 
+  describe('sync_file()', function() {
+
+    before(function() {
+      mockfs({'local/albums/1989/out-of-the-woods.mp3': 2});
+    });
+
+    it('pulls a file off the network and saves it to disk', function(done) {
+      nock('https://api-content.dropbox.com:443', {"encodedQueryParams":true})
+        .get('/1/files/auto/albums/1989/style.mp3')
+        .reply(200, 'we never go out of style');
+
+      this.dropbox.sync_file(['albums/1989/style.mp3']).then(function() {
+        fs.readFile('local/albums/1989/style.mp3', function(err, content) {
+          if(err) { done(err); }
+          content.toString().should.be.exactly('we never go out of style');
+          done();
+        })
+      }, done).done();
+    });
+
+  });
+
 });
