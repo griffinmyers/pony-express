@@ -244,18 +244,11 @@ describe('Bucket', function() {
         .reply(200, '');
 
       var put_manifest = nock('https://remote.s3.amazonaws.com:443')
-        .filteringRequestBody(function(body) {
-          var parsed = JSON.parse(body);
-          if(parsed.hasOwnProperty('local-only.gif') &&
-             parsed.hasOwnProperty('loveisall.jpg') &&
-             parsed.hasOwnProperty('loveisall2.jpg')) {
-            return '*';
-          }
-          else {
-            return '-';
-          }
+        .put('/.pony-manifest', function(body) {
+          return (body.hasOwnProperty('local-only.gif') &&
+                  body.hasOwnProperty('loveisall.jpg') &&
+                  body.hasOwnProperty('loveisall2.jpg'));
         })
-        .put('/.pony-manifest', '*')
         .reply(200, '');
 
       this.bucket.push().then(function() {
@@ -295,18 +288,11 @@ describe('Bucket', function() {
         .reply(200, '');
 
       var put_manifest = nock('https://remote.s3.amazonaws.com:443')
-        .filteringRequestBody(function(body) {
-          var parsed = JSON.parse(body);
-          if(parsed.hasOwnProperty('local-only.gif') &&
-             parsed.hasOwnProperty('loveisall.jpg') &&
-             parsed.hasOwnProperty('loveisall2.jpg')) {
-            return '*';
-          }
-          else {
-            return '-';
-          }
+        .put('/.pony-manifest', function(body) {
+          return (body.hasOwnProperty('local-only.gif') &&
+                  body.hasOwnProperty('loveisall.jpg') &&
+                  body.hasOwnProperty('loveisall2.jpg'));
         })
-        .put('/.pony-manifest', '*')
         .reply(200, '');
 
       this.bucket.push().then(function() {
@@ -347,8 +333,7 @@ describe('Bucket', function() {
         .reply(200, '');
 
       var put_manifest = nock('https://remote.s3.amazonaws.com:443')
-        .filteringRequestBody(function(body) { return '*'; })
-        .put('/.pony-manifest', '*')
+        .put('/.pony-manifest', function() { return true; })
         .reply(404);
 
       var del_manifest = nock('https://remote.s3.amazonaws.com:443')
