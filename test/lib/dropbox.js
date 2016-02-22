@@ -140,30 +140,31 @@ describe('Dropbox', function() {
   describe('fetch_file()', function() {
 
     it('makes a network request for a file', function(done) {
-
-      nock('https://api-content.dropbox.com:443', {"encodedQueryParams":true})
+      var fetch = nock('https://api-content.dropbox.com:443', {"encodedQueryParams":true})
         .get('/1/files/auto//albums/1989/style.mp3')
         .reply(200, 'bitsbitsbits');
 
       this.dropbox.fetch_file('/albums/1989/style.mp3').then(function(res) {
         res.toString().should.be.exactly('bitsbitsbits');
+        fetch.done();
         done();
       }, done).done();
     });
 
     it('ignores HTTP errors', function(done) {
-      nock('https://api-content.dropbox.com:443', {"encodedQueryParams":true})
+      var fetch = nock('https://api-content.dropbox.com:443', {"encodedQueryParams":true})
         .get('/1/files/auto//albums/1989/style.mp3')
         .reply(500);
 
       this.dropbox.fetch_file('/albums/1989/style.mp3').then(function(res) {
         res.toString().should.be.exactly('');
+        fetch.done();
         done();
       }, done).done();
     });
 
     it('handles application level errors', function(done) {
-      nock('https://api-content.dropbox.com:443', {"encodedQueryParams":true})
+      var fetch = nock('https://api-content.dropbox.com:443', {"encodedQueryParams":true})
         .get('/1/files/auto//albums/1989/style.mp3')
         .reply(200, {error: 'doh'});
 
@@ -171,12 +172,13 @@ describe('Dropbox', function() {
         done('Should have failed.');
       }, function(reason) {
         reason.message.should.be.exactly('doh 1/files/auto//albums/1989/style.mp3');
+        fetch.done();
         done();
       }).done();
     });
 
     it('handles network errors', function(done) {
-      nock('https://api-content.dropbox.com:443', {"encodedQueryParams":true})
+      var fetch = nock('https://api-content.dropbox.com:443', {"encodedQueryParams":true})
         .get('/1/files/auto//albums/1989/style.mp3')
         .replyWithError('Network Failure');
 
@@ -184,8 +186,73 @@ describe('Dropbox', function() {
         done('Should have failed.');
       }, function(reason) {
         reason.message.should.be.exactly('Network Failure');
+        fetch.done();
         done();
       }).done();
+    });
+
+  });
+
+  describe('delta()', function() {
+
+    it('makes a delta request with an empty cursor', function(done) {
+      var delta = nock('https://api.dropbox.com:443', {"encodedQueryParams":true})
+        .post('/1/delta')
+        .reply(200, {has_more: false, entries: [1, 2, 3]});
+
+      this.dropbox.delta().then(function(res) {
+        res.entries.should.have.length(3);
+        delta.done();
+        done();
+      }, done).done();;
+    });
+
+    it('handles application level errors', function(done) {
+      var delta = nock('https://api.dropbox.com:443', {"encodedQueryParams":true})
+        .post('/1/delta')
+        .reply(401, {error: 'bloop'});
+
+      this.dropbox.delta().then(function(res) {
+        done('Should have failed.');
+      }, function(reason) {
+        reason.message.should.be.exactly('bloop');
+        delta.done();
+        done();
+      }).done();
+    });
+
+    it('makes a delta request with a cursor', function(done) {
+      var delta = nock('https://api.dropbox.com:443', {"encodedQueryParams":true})
+        .post('/1/delta', 'cursor=1989')
+        .reply(200, {has_more: false, entries: [1, 2, 3]});
+
+      this.dropbox.delta(1989).then(function(res) {
+        res.entries.should.have.length(3);
+        delta.done();
+        done();
+      }, done).done();;
+    });
+
+    it('unpages a many delta requests', function(done) {
+      var page1 = nock('https://api.dropbox.com:443', {"encodedQueryParams":true})
+        .post('/1/delta', 'cursor=1989')
+        .reply(200, {has_more: true, entries: [1, 2, 3]});
+
+      var page2 = nock('https://api.dropbox.com:443', {"encodedQueryParams":true})
+        .post('/1/delta', 'cursor=1989')
+        .reply(200, {has_more: true, entries: [4, 5]});
+
+      var page3 = nock('https://api.dropbox.com:443', {"encodedQueryParams":true})
+        .post('/1/delta', 'cursor=1989')
+        .reply(200, {has_more: false, entries: [6]});
+
+      this.dropbox.delta(1989).then(function(res) {
+        res.entries.should.have.length(6);
+        page1.done();
+        page2.done();
+        page3.done();
+        done();
+      }, done).done();;
     });
 
   });
