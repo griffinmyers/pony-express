@@ -3,6 +3,7 @@ var nock = require('nock');
 var mockfs = require('mock-fs');
 var Dropbox = require('../../lib/dropbox.js');
 var fs = require('fs');
+var Q = require('q');
 
 describe('Dropbox', function() {
 
@@ -52,6 +53,12 @@ describe('Dropbox', function() {
 
   describe('delete_cursor()', function() {
 
+    before(function() {
+      mockfs({
+        'local/.pony-token': '1989',
+      });
+    });
+
     it('deletes a cursor on disk', function(done) {
       this.dropbox.delete_cursor().then(function() {
         fs.readdir('local', function(err, files) {
@@ -67,6 +74,62 @@ describe('Dropbox', function() {
         fs.readdir('local', function(err, files) {
           if (err) { done(err); }
           files.should.have.length(0);
+          done();
+        });
+      }, done).done();
+    });
+
+  });
+
+  describe('reset()', function() {
+
+    before(function() {
+      mockfs({
+        'local/.pony-token': '1989',
+        'local/1/2/3.mp3': 'Ive got a blank space baby',
+        'local/1.mp3': 'On videotape on videotape'
+      });
+    });
+
+    it('resets a local directory', function(done) {
+      this.dropbox.reset().then(function() {
+        fs.readdir('local', function(err, files) {
+          if (err) { done(err); }
+          files.should.have.length(0);
+          done();
+        });
+      }, done).done();
+    });
+
+  });
+
+  describe('maybe_reset()', function() {
+
+    beforeEach(function() {
+      mockfs({
+        'local/.pony-token': '1989',
+        'local/1/2/3.mp3': 'Ive got a blank space baby',
+        'local/1.mp3': 'On videotape on videotape'
+      });
+    });
+
+    it('resets a local directory', function(done) {
+      Q(this.dropbox.maybe_reset({reset: true})).then(function(res) {
+        fs.readdir('local', function(err, files) {
+          if (err) { done(err); }
+          files.should.have.length(0);
+          res.reset.should.be.exactly.true;
+          done();
+        });
+      }, done).done();
+    });
+
+    it('doesn\'t reset a local directory', function(done) {
+      Q(this.dropbox.maybe_reset({reset: false})).then(function(res) {
+        fs.readdir('local', function(err, files) {
+          if (err) { done(err); }
+          files.should.have.length(3);
+          res.reset.should.be.exactly.false;
           done();
         });
       }, done).done();
