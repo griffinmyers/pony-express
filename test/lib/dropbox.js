@@ -318,4 +318,62 @@ describe('Dropbox', function() {
 
   });
 
+  describe('sync_entries()', function() {
+
+    before(function() {
+      mockfs({
+        'local/albums/1989/out-of-the-woods.mp3': '2',
+        'local/albums/taylor-swift/red/trouble.mp3': '3'
+      });
+    });
+
+    it('syncs a list of entries', function(done) {
+      var nude = nock('https://api-content.dropbox.com:443', {"encodedQueryParams":true})
+        .get('/1/files/auto/albums/radiohead/in-rainbows/nude.mp3')
+        .reply(200, 'dont get any big ideas');
+
+      var trouble = nock('https://api-content.dropbox.com:443', {"encodedQueryParams":true})
+        .get('/1/files/auto/albums/taylor-swift/red/trouble.mp3')
+        .reply(200, 'i knew you were trouble');
+
+      this.dropbox.sync_entries({cursor: 1989, entries: [
+        ['albums/radiohead/in-rainbows/nude.mp3', {is_dir: false}],
+        ['albums/1989', null],
+        ['albums/radiohead/in-rainbows', {is_dir: true}],
+        ['albums/radiohead/amnesiac', {is_dir: true}],
+        ['albums/grizzly-bear/veckatimest', {is_dir: true}],
+        ['albums/1989/style.mp3', null],
+        ['albums/taylor-swift/red/trouble.mp3', {is_dir: false}]
+      ]}).then(function(res) {
+        res.should.be.exactly(1989);
+        fs.readdir('local/albums', assertAlbums);
+
+        function assertAlbums(err, files) {
+          if(err) { done(err); }
+          files.should.containEql('radiohead');
+          files.should.containEql('grizzly-bear');
+          files.should.containEql('taylor-swift');
+          files.should.have.length(3);
+          fs.readFile('local/albums/radiohead/in-rainbows/nude.mp3', assertRadiohead);
+        }
+
+        function assertRadiohead(err, content) {
+          if(err) { done(err); }
+          content.toString().should.be.exactly('dont get any big ideas')
+          nude.done();
+          fs.readFile('local/albums/taylor-swift/red/trouble.mp3', assertTaylor);
+        }
+
+        function assertTaylor(err, content) {
+          if (err) { done(err); }
+          content.toString().should.be.exactly('i knew you were trouble')
+          trouble.done();
+          done();
+        }
+
+      }, done).done();
+    });
+
+  });
+
 });
