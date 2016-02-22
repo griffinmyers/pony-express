@@ -137,4 +137,44 @@ describe('Dropbox', function() {
 
   });
 
+  describe('fetch_file()', function() {
+
+    it('makes a network request for a file', function(done) {
+
+      nock('https://api-content.dropbox.com:443', {"encodedQueryParams":true})
+        .get('/1/files/auto//albums/1989/style.mp3')
+        .reply(200, 'bitsbitsbits');
+
+      this.dropbox.fetch_file('/albums/1989/style.mp3').then(function(res) {
+        res.toString().should.be.exactly('bitsbitsbits');
+        done();
+      }, done).done();
+    });
+
+    it('ignores HTTP errors', function(done) {
+      nock('https://api-content.dropbox.com:443', {"encodedQueryParams":true})
+        .get('/1/files/auto//albums/1989/style.mp3')
+        .reply(500);
+
+      this.dropbox.fetch_file('/albums/1989/style.mp3').then(function(res) {
+        res.toString().should.be.exactly('');
+        done();
+      }, done).done();
+    });
+
+    it('handles application level errors', function(done) {
+      nock('https://api-content.dropbox.com:443', {"encodedQueryParams":true})
+        .get('/1/files/auto//albums/1989/style.mp3')
+        .reply(200, {error: 'doh'});
+
+      this.dropbox.fetch_file('/albums/1989/style.mp3').then(function(res) {
+        done('Should have failed.');
+      }, function(reason) {
+        reason.message.should.be.exactly('doh 1/files/auto//albums/1989/style.mp3');
+        done();
+      }).done();
+    });
+
+  });
+
 });
