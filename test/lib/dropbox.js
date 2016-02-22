@@ -175,6 +175,19 @@ describe('Dropbox', function() {
       }).done();
     });
 
+    it('handles network errors', function(done) {
+      nock('https://api-content.dropbox.com:443', {"encodedQueryParams":true})
+        .get('/1/files/auto//albums/1989/style.mp3')
+        .replyWithError('Network Failure');
+
+      this.dropbox.fetch_file('/albums/1989/style.mp3').then(function(res) {
+        done('Should have failed.');
+      }, function(reason) {
+        reason.message.should.be.exactly('Network Failure');
+        done();
+      }).done();
+    });
+
   });
 
 });
