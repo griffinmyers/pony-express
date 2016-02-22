@@ -213,7 +213,7 @@ describe('Bucket', function() {
     });
   });
 
-  describe.only('push()', function() {
+  describe('push()', function() {
     before(function() {
       mockfs({
         'local/loveisall.jpg': new Buffer([8, 6, 7, 5, 3, 0, 9]),
