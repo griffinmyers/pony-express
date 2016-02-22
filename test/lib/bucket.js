@@ -180,4 +180,37 @@ describe('Bucket', function() {
     });
   });
 
+  describe('upload_diff()', function() {
+    before(function() {
+      mockfs({
+        'local/loveisall2.jpg': new Buffer([8, 6, 7, 5, 3, 0, 9]),
+        'local/local-only.gif': new Buffer([8, 6, 7, 5, 3, 0, 9])
+      });
+    });
+
+    it('uploads a diff of what has changed', function(done) {
+      var del = nock('https://remote.s3.amazonaws.com:443')
+        .post('/?delete', '<Delete xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Object><Key>remote-only.gif</Key></Object></Delete>')
+        .reply(200, '<?xml version="1.0" encoding="UTF-8"?>\n<DeleteResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Deleted><Key>remote-only.gif</Key></Deleted></DeleteResult>')
+
+      var upload1 = nock('https://remote.s3.amazonaws.com:443')
+        .put('/loveisall2.jpg', '\b\u0006\u0007\u0005\u0003\u0000\t')
+        .reply(200, '');
+
+      var upload2 = nock('https://remote.s3.amazonaws.com:443')
+        .put('/local-only.gif', '\b\u0006\u0007\u0005\u0003\u0000\t')
+        .reply(200, '');
+
+      var remote = {'loveisall.jpg': 1, 'loveisall2.jpg': 2, 'remote-only.gif': 4};
+      var local = {'loveisall.jpg': 1, 'loveisall2.jpg': 3, 'local-only.gif': 5};
+
+      this.bucket.upload_diff(remote, local).then(function(res) {
+        del.done();
+        upload1.done();
+        upload2.done();
+        done();
+      }, done).done();
+    });
+  });
+
 });
