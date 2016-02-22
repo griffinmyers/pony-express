@@ -2,12 +2,15 @@ var should = require('should');
 var nock = require('nock');
 var mockfs = require('mock-fs');
 var Dropbox = require('../../lib/dropbox.js');
+var fs = require('fs');
 
 describe('Dropbox', function() {
 
   beforeEach(function() {
     this.dropbox = new Dropbox('access_key', 'local');
   });
+
+  after(mockfs.restore);
 
   describe('cursor()', function() {
 
@@ -28,6 +31,20 @@ describe('Dropbox', function() {
       new Dropbox('access_key', 'tmp').cursor().then(function(res) {
         should.not.exist(res);
         done();
+      }, done).done();
+    });
+
+  });
+
+  describe('save_cursor()', function() {
+
+    it('saves a cursor to disk', function(done) {
+      this.dropbox.save_cursor('1989').then(function(res) {
+        fs.readFile('local/.pony-token', function(err, content) {
+          if (err) { done(err); }
+          content.toString().should.be.exactly('1989');
+          done();
+        });
       }, done).done();
     });
 
