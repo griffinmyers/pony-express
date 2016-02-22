@@ -8,7 +8,7 @@ describe('Store', function() {
     this.store = new Store('bucket', true);
   });
 
-  describe('get', function() {
+  describe('get()', function() {
     it('gets something', function(done) {
       var amazon = nock('https://bucket.s3.amazonaws.com:443')
         .get('/boop')
@@ -56,7 +56,7 @@ describe('Store', function() {
     });
   });
 
-  describe('put', function() {
+  describe('put()', function() {
     it('puts something', function(done) {
       var amazon = nock('https://bucket.s3.amazonaws.com:443')
         .put('/boop', 'bleep')

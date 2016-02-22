@@ -268,7 +268,7 @@ describe('Middlware', function() {
     });
   });
 
-  describe('row', function() {
+  describe('row()', function() {
     it('Adds rows', function() {
       this.files['row1.html'] = {contents: 'bleep'};
       this.files['row2.html'] = {contents: 'bloop'};
@@ -330,7 +330,7 @@ describe('Middlware', function() {
     });
   });
 
-  describe('two_column', function() {
+  describe('two_column()', function() {
     it('supports two columns', function() {
       this.files['left.html'] = {contents: 'bleep'};
       this.files['right.html'] = {contents: 'bloop'};
@@ -354,7 +354,7 @@ describe('Middlware', function() {
     });
   });
 
-  describe('wrap', function() {
+  describe('wrap()', function() {
     it('wraps', function() {
       this.files['d.html'] = {contents: new Buffer('bleep'), wrap: 'bloop'}
 
