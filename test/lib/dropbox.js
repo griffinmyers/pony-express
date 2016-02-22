@@ -264,7 +264,7 @@ describe('Dropbox', function() {
     });
 
     it('pulls a file off the network and saves it to disk', function(done) {
-      nock('https://api-content.dropbox.com:443', {"encodedQueryParams":true})
+      var sync = nock('https://api-content.dropbox.com:443', {"encodedQueryParams":true})
         .get('/1/files/auto/albums/1989/style.mp3')
         .reply(200, 'we never go out of style');
 
@@ -272,9 +272,48 @@ describe('Dropbox', function() {
         fs.readFile('local/albums/1989/style.mp3', function(err, content) {
           if(err) { done(err); }
           content.toString().should.be.exactly('we never go out of style');
+          sync.done();
           done();
         })
       }, done).done();
+    });
+
+  });
+
+  describe('sync_folder_or_delete()', function() {
+
+    before(function() {
+      mockfs({'local/albums/1989/out-of-the-woods.mp3': 2});
+    });
+
+    it('deletes folders locally', function(done) {
+      this.dropbox.sync_folder_or_delete(['albums/1989', null]).then(function(res) {
+        fs.readdir('local/albums', function(err, files) {
+          if(err) { done(err); }
+          files.should.have.length(0);
+          done();
+        });
+      }, done).done();;
+    });
+
+    it('creates folders locally', function(done) {
+      this.dropbox.sync_folder_or_delete(['albums/in-rainbows', {}]).then(function(res) {
+        fs.readdir('local/albums/in-rainbows', function(err, files) {
+          if(err) { done(err); }
+          files.should.have.length(0);
+          done();
+        });
+      }, done).done();;
+    });
+
+    it('resets folders locally', function(done) {
+      this.dropbox.sync_folder_or_delete(['albums/1989', {}]).then(function(res) {
+        fs.readdir('local/albums/1989', function(err, files) {
+          if(err) { done(err); }
+          files.should.have.length(0);
+          done();
+        });
+      }, done).done();;
     });
 
   });
