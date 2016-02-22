@@ -50,4 +50,28 @@ describe('Dropbox', function() {
 
   });
 
+  describe('delete_cursor()', function() {
+
+    it('deletes a cursor on disk', function(done) {
+      this.dropbox.delete_cursor().then(function() {
+        fs.readdir('local', function(err, files) {
+          if (err) { done(err); }
+          files.should.have.length(0);
+          done();
+        });
+      }, done).done();;
+    });
+
+    it('deletes happily ignores a cursor that doesn\'t exist', function(done) {
+      new Dropbox('access_key', 'tmp').delete_cursor().then(function(res) {
+        fs.readdir('local', function(err, files) {
+          if (err) { done(err); }
+          files.should.have.length(0);
+          done();
+        });
+      }, done).done();
+    });
+
+  });
+
 });
