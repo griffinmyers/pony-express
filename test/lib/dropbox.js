@@ -66,7 +66,7 @@ describe('Dropbox', function() {
           files.should.have.length(0);
           done();
         });
-      }, done).done();;
+      }, done).done();
     });
 
     it('deletes happily ignores a cursor that doesn\'t exist', function(done) {
@@ -204,7 +204,7 @@ describe('Dropbox', function() {
         res.entries.should.have.length(3);
         delta.done();
         done();
-      }, done).done();;
+      }, done).done();
     });
 
     it('handles application level errors', function(done) {
@@ -230,7 +230,7 @@ describe('Dropbox', function() {
         res.entries.should.have.length(3);
         delta.done();
         done();
-      }, done).done();;
+      }, done).done();
     });
 
     it('unpages a many delta requests', function(done) {
@@ -252,7 +252,7 @@ describe('Dropbox', function() {
         page2.done();
         page3.done();
         done();
-      }, done).done();;
+      }, done).done();
     });
 
   });
@@ -270,7 +270,7 @@ describe('Dropbox', function() {
 
       this.dropbox.sync_file(['albums/1989/style.mp3']).then(function() {
         fs.readFile('local/albums/1989/style.mp3', function(err, content) {
-          if(err) { done(err); }
+          if(err) { done(err); return; }
           content.toString().should.be.exactly('we never go out of style');
           sync.done();
           done();
@@ -289,31 +289,31 @@ describe('Dropbox', function() {
     it('deletes folders locally', function(done) {
       this.dropbox.sync_folder_or_delete(['albums/1989', null]).then(function(res) {
         fs.readdir('local/albums', function(err, files) {
-          if(err) { done(err); }
+          if(err) { done(err); return; }
           files.should.have.length(0);
           done();
         });
-      }, done).done();;
+      }, done).done();
     });
 
     it('creates folders locally', function(done) {
       this.dropbox.sync_folder_or_delete(['albums/in-rainbows', {}]).then(function(res) {
         fs.readdir('local/albums/in-rainbows', function(err, files) {
-          if(err) { done(err); }
+          if(err) { done(err); return; }
           files.should.have.length(0);
           done();
         });
-      }, done).done();;
+      }, done).done();
     });
 
     it('resets folders locally', function(done) {
       this.dropbox.sync_folder_or_delete(['albums/1989', {}]).then(function(res) {
         fs.readdir('local/albums/1989', function(err, files) {
-          if(err) { done(err); }
+          if(err) { done(err); return; }
           files.should.have.length(0);
           done();
         });
-      }, done).done();;
+      }, done).done();
     });
 
   });
@@ -349,7 +349,7 @@ describe('Dropbox', function() {
         fs.readdir('local/albums', assertAlbums);
 
         function assertAlbums(err, files) {
-          if(err) { done(err); }
+          if(err) { done(err); return; }
           files.should.containEql('radiohead');
           files.should.containEql('grizzly-bear');
           files.should.containEql('taylor-swift');
@@ -358,7 +358,7 @@ describe('Dropbox', function() {
         }
 
         function assertRadiohead(err, content) {
-          if(err) { done(err); }
+          if(err) { done(err); return; }
           content.toString().should.be.exactly('dont get any big ideas')
           nude.done();
           fs.readFile('local/albums/taylor-swift/red/trouble.mp3', assertTaylor);
@@ -372,6 +372,75 @@ describe('Dropbox', function() {
         }
 
       }, done).done();
+    });
+
+  });
+
+  describe('sync()', function() {
+
+    beforeEach(function() {
+      mockfs({
+        'local/.pony-token': '1989',
+        'local/albums/taylor-swift/red/trouble.mp3': '3'
+      });
+    });
+
+    it('syncs', function(done) {
+      var page1 = nock('https://api.dropbox.com:443', {"encodedQueryParams":true})
+        .post('/1/delta', "cursor=1989")
+        .reply(200, {cursor: 1990, has_more: true, entries: [
+          ['albums/radiohead/in-rainbows/nude.mp3', {is_dir: false}],
+          ['albums/1989', null],
+          ['albums/radiohead/in-rainbows', {is_dir: true}],
+          ['albums/radiohead/amnesiac', {is_dir: true}]
+        ]});
+
+      var page2 = nock('https://api.dropbox.com:443', {"encodedQueryParams":true})
+        .post('/1/delta', "cursor=1989")
+        .reply(200, {cursor: 1990, has_more: false, entries: [
+          ['albums/grizzly-bear/veckatimest', {is_dir: true}],
+          ['albums/1989/style.mp3', null],
+          ['albums/taylor-swift/red/trouble.mp3', {is_dir: false}]
+        ]});
+
+      var nude = nock('https://api-content.dropbox.com:443', {"encodedQueryParams":true})
+        .get('/1/files/auto/albums/radiohead/in-rainbows/nude.mp3')
+        .reply(200, 'dont get any big ideas');
+
+      var trouble = nock('https://api-content.dropbox.com:443', {"encodedQueryParams":true})
+        .get('/1/files/auto/albums/taylor-swift/red/trouble.mp3')
+        .reply(200, 'i knew you were trouble');
+
+      this.dropbox.sync().then(function() {
+        fs.readFile('local/.pony-token', function(err, content) {
+          if(err) { done(err); return; }
+          content.toString().should.be.exactly('1990');
+          done();
+        });
+
+        page1.done();
+        page2.done();
+        nude.done();
+        trouble.done();
+      }, done).done();
+    });
+
+    it('deletes the cursor if anything breaks', function(done) {
+      var delta = nock('https://api.dropbox.com:443', {"encodedQueryParams":true})
+        .post('/1/delta', "cursor=1989")
+        .replyWithError('doh');
+
+      this.dropbox.sync().then(function() {
+        done('Should not have resolved.');
+      }, function(reason) {
+        fs.readFile('local/.pony-token', function(err, content) {
+          reason.message.should.be.exactly('doh');
+          if(err) { done(); return; }
+          done('Cursor should have been deleted.');
+        });
+
+        delta.done();
+      }).done();
     });
 
   });

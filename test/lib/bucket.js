@@ -176,7 +176,7 @@ describe('Bucket', function() {
         list.done();
         del.done();
         done();
-      }, done).done();;
+      }, done).done();
     });
   });
 
