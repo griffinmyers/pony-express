@@ -4,9 +4,18 @@ var request = require('supertest');
 var should = require('should');
 var qs = require('querystring');
 var nock = require('nock');
-nock.enableNetConnect('127.0.0.1');
 
 describe('App', function() {
+
+  before(function() {
+    nock.enableNetConnect('127.0.0.1');
+  });
+
+  after(function() {
+    nock.cleanAll();
+    nock.enableNetConnect();
+  })
+
   describe('GET /', function(){
     it('responds', function(done){
       request(app)

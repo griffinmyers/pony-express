@@ -8,7 +8,7 @@ var Dropbox = require('./lib/dropbox');
 var store = new (require('./lib/store'))(config.key_bucket);
 
 if(process.argv.length < 3) {
-  console.log('Usage: node build.js id [dev, push]');
+  console.log('Usage: node build.js id [dev, push, fetch]');
   return;
 }
 

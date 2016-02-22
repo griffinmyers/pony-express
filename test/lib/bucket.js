@@ -3,16 +3,16 @@ var nock = require('nock');
 var Bucket = require('../../lib/bucket.js');
 var mockfs = require('mock-fs');
 
-//nock.recorder.rec();
-
 describe('Bucket', function() {
 
   beforeEach(function() {
     this.bucket = new Bucket('local', 'remote');
   });
 
+  after(mockfs.restore);
+
   describe('get_local_manifest()', function() {
-    beforeEach(function() {
+    before(function() {
       mockfs({
         'local/dir': {
           'runner.txt': 'This mighty river is my saviour and my sin',
@@ -25,7 +25,6 @@ describe('Bucket', function() {
       });
     });
 
-    afterEach(mockfs.restore);
     it('reads the fs for a local manifest', function(done) {
       this.bucket.get_local_manifest().then(function(manifest) {
         manifest.should.have.property('dir/runner.txt', '65407f0c8847ca88adc2d74a66c32978382207f4');
@@ -110,11 +109,9 @@ describe('Bucket', function() {
   });
 
   describe('upload()', function() {
-    beforeEach(function() {
+    before(function() {
       mockfs({'local/loveisall.jpg': new Buffer([8, 6, 7, 5, 3, 0, 9])});
     });
-
-    afterEach(mockfs.restore);
 
     it('uploads with a guessed mimetype', function(done) {
       var amazon = nock('https://remote.s3.amazonaws.com:443')
@@ -130,18 +127,14 @@ describe('Bucket', function() {
   });
 
   describe('upload_all', function() {
-
-    beforeEach(function() {
+    before(function() {
       mockfs({
         'local/loveisall.jpg': new Buffer([8, 6, 7, 5, 3, 0, 9]),
         'local/loveisall2.jpg': new Buffer([8, 6, 7, 5, 3, 0, 9])
       });
     });
 
-    afterEach(mockfs.restore);
-
     it('uploads everything from a manifest', function(done) {
-
       var list = nock('https://remote.s3.amazonaws.com:443')
         .get('/')
         .reply(200, '<?xml version="1.0" encoding="UTF-8"?><ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Name>remote</Name><Prefix></Prefix><Marker></Marker><MaxKeys>1000</MaxKeys><IsTruncated>false</IsTruncated><Contents><Key>index.html</Key></Contents><LastModified>2015-04-08T13:03:10.000Z</LastModified><ETag>&quot;58f62302b2e54b69f00360b0e84d6796&quot;</ETag><Size>940</Size><Owner><ID>65b749052bb8ea4df26271b212f78201abc29c23daaba7a05dc418f7fb5d053b</ID><DisplayName>griffin.myers</DisplayName></Owner><StorageClass>STANDARD</StorageClass></ListBucketResult>');
@@ -151,12 +144,12 @@ describe('Bucket', function() {
         .reply(200, '<?xml version="1.0" encoding="UTF-8"?>\n<DeleteResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Deleted><Key>index.html</Key></Deleted></DeleteResult>')
 
       var upload1 = nock('https://remote.s3.amazonaws.com:443')
-        .put('/loveisall.jpg', "\b\u0006\u0007\u0005\u0003\u0000\t")
+        .put('/loveisall.jpg', '\b\u0006\u0007\u0005\u0003\u0000\t')
         .reply(200, '');
 
       var upload2 = nock('https://remote.s3.amazonaws.com:443')
-       .put('/loveisall2.jpg', "\b\u0006\u0007\u0005\u0003\u0000\t")
-       .reply(200, '');
+        .put('/loveisall2.jpg', '\b\u0006\u0007\u0005\u0003\u0000\t')
+        .reply(200, '');
 
       this.bucket.upload_all({'loveisall.jpg': 1, 'loveisall2.jpg': 2}).then(function(res) {
         list.done();
@@ -165,7 +158,6 @@ describe('Bucket', function() {
         upload2.done();
         done();
       }, done).done();
-
     });
 
   });
