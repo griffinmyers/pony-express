@@ -126,7 +126,7 @@ describe('Bucket', function() {
     });
   });
 
-  describe('upload_all', function() {
+  describe('upload_all()', function() {
     before(function() {
       mockfs({
         'local/loveisall.jpg': new Buffer([8, 6, 7, 5, 3, 0, 9]),
@@ -160,6 +160,24 @@ describe('Bucket', function() {
       }, done).done();
     });
 
+  });
+
+  describe('clear()', function() {
+    it('clears everything from a bucket', function(done) {
+      var list = nock('https://remote.s3.amazonaws.com:443')
+        .get('/')
+        .reply(200, '<?xml version="1.0" encoding="UTF-8"?><ListBucketResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Name>remote</Name><Prefix></Prefix><Marker></Marker><MaxKeys>1000</MaxKeys><IsTruncated>false</IsTruncated><Contents><Key>index.html</Key></Contents><LastModified>2015-04-08T13:03:10.000Z</LastModified><ETag>&quot;58f62302b2e54b69f00360b0e84d6796&quot;</ETag><Size>940</Size><Owner><ID>65b749052bb8ea4df26271b212f78201abc29c23daaba7a05dc418f7fb5d053b</ID><DisplayName>griffin.myers</DisplayName></Owner><StorageClass>STANDARD</StorageClass></ListBucketResult>');
+
+      var del = nock('https://remote.s3.amazonaws.com:443')
+        .post('/?delete', '<Delete xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Object><Key>index.html</Key></Object></Delete>')
+        .reply(200, '<?xml version="1.0" encoding="UTF-8"?>\n<DeleteResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Deleted><Key>index.html</Key></Deleted></DeleteResult>')
+
+      this.bucket.clear().then(function(res) {
+        list.done();
+        del.done();
+        done();
+      }, done).done();;
+    });
   });
 
 });
