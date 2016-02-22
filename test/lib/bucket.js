@@ -78,7 +78,7 @@ describe('Bucket', function() {
         .put('/.pony-manifest', JSON.stringify(manifest))
         .reply(200, '');
 
-      this.bucket.put_remote_manifest(manifest).then(function(res) {
+      this.bucket.put_remote_manifest(manifest).then(function() {
         amazon.done();
         done();
       }, done).done();
@@ -102,7 +102,7 @@ describe('Bucket', function() {
     });
 
     it('short-circuits with nothing to delete', function(done) {
-      this.bucket.del([]).then(function(res) {
+      this.bucket.del([]).then(function() {
         done();
       }, done).done();
     });
@@ -151,7 +151,7 @@ describe('Bucket', function() {
         .put('/loveisall2.jpg', '\b\u0006\u0007\u0005\u0003\u0000\t')
         .reply(200, '');
 
-      this.bucket.upload_all({'loveisall.jpg': 1, 'loveisall2.jpg': 2}).then(function(res) {
+      this.bucket.upload_all({'loveisall.jpg': 1, 'loveisall2.jpg': 2}).then(function() {
         list.done();
         del.done();
         upload1.done();
@@ -172,7 +172,7 @@ describe('Bucket', function() {
         .post('/?delete', '<Delete xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Object><Key>index.html</Key></Object></Delete>')
         .reply(200, '<?xml version="1.0" encoding="UTF-8"?>\n<DeleteResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Deleted><Key>index.html</Key></Deleted></DeleteResult>')
 
-      this.bucket.clear().then(function(res) {
+      this.bucket.clear().then(function() {
         list.done();
         del.done();
         done();
@@ -204,7 +204,7 @@ describe('Bucket', function() {
       var remote = {'loveisall.jpg': 1, 'loveisall2.jpg': 2, 'remote-only.gif': 4};
       var local = {'loveisall.jpg': 1, 'loveisall2.jpg': 3, 'local-only.gif': 5};
 
-      this.bucket.upload_diff(remote, local).then(function(res) {
+      this.bucket.upload_diff(remote, local).then(function() {
         del.done();
         upload1.done();
         upload2.done();

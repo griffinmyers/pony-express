@@ -72,6 +72,7 @@ Run the application and visit `/authorize` to get dropbox keys properly installe
 ### Releasing
 
 * `npm test`
+* `npm run lint`
 * `git tag x.y.z`
 * `git push --tags`
 * `eb deploy -l x.y.z`

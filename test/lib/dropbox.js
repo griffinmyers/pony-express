@@ -17,7 +17,7 @@ describe('Dropbox', function() {
 
     before(function() {
       mockfs({
-        'local/.pony-token': '1989',
+        'local/.pony-token': '1989'
       });
     });
 
@@ -40,7 +40,7 @@ describe('Dropbox', function() {
   describe('save_cursor()', function() {
 
     it('saves a cursor to disk', function(done) {
-      this.dropbox.save_cursor('1989').then(function(res) {
+      this.dropbox.save_cursor('1989').then(function() {
         fs.readFile('local/.pony-token', function(err, content) {
           if (err) { done(err); }
           content.toString().should.be.exactly('1989');
@@ -55,7 +55,7 @@ describe('Dropbox', function() {
 
     before(function() {
       mockfs({
-        'local/.pony-token': '1989',
+        'local/.pony-token': '1989'
       });
     });
 
@@ -70,7 +70,7 @@ describe('Dropbox', function() {
     });
 
     it('deletes happily ignores a cursor that doesn\'t exist', function(done) {
-      new Dropbox('access_key', 'tmp').delete_cursor().then(function(res) {
+      new Dropbox('access_key', 'tmp').delete_cursor().then(function() {
         fs.readdir('local', function(err, files) {
           if (err) { done(err); }
           files.should.have.length(0);
@@ -140,7 +140,7 @@ describe('Dropbox', function() {
   describe('fetch_file()', function() {
 
     it('makes a network request for a file', function(done) {
-      var fetch = nock('https://api-content.dropbox.com:443', {"encodedQueryParams":true})
+      var fetch = nock('https://api-content.dropbox.com:443', {'encodedQueryParams':true})
         .get('/1/files/auto//albums/1989/style.mp3')
         .reply(200, 'bitsbitsbits');
 
@@ -152,7 +152,7 @@ describe('Dropbox', function() {
     });
 
     it('ignores HTTP errors', function(done) {
-      var fetch = nock('https://api-content.dropbox.com:443', {"encodedQueryParams":true})
+      var fetch = nock('https://api-content.dropbox.com:443', {'encodedQueryParams':true})
         .get('/1/files/auto//albums/1989/style.mp3')
         .reply(500);
 
@@ -164,11 +164,11 @@ describe('Dropbox', function() {
     });
 
     it('handles application level errors', function(done) {
-      var fetch = nock('https://api-content.dropbox.com:443', {"encodedQueryParams":true})
+      var fetch = nock('https://api-content.dropbox.com:443', {'encodedQueryParams':true})
         .get('/1/files/auto//albums/1989/style.mp3')
         .reply(200, {error: 'doh'});
 
-      this.dropbox.fetch_file('/albums/1989/style.mp3').then(function(res) {
+      this.dropbox.fetch_file('/albums/1989/style.mp3').then(function() {
         done('Should have failed.');
       }, function(reason) {
         reason.message.should.be.exactly('doh 1/files/auto//albums/1989/style.mp3');
@@ -178,11 +178,11 @@ describe('Dropbox', function() {
     });
 
     it('handles network errors', function(done) {
-      var fetch = nock('https://api-content.dropbox.com:443', {"encodedQueryParams":true})
+      var fetch = nock('https://api-content.dropbox.com:443', {'encodedQueryParams':true})
         .get('/1/files/auto//albums/1989/style.mp3')
         .replyWithError('Network Failure');
 
-      this.dropbox.fetch_file('/albums/1989/style.mp3').then(function(res) {
+      this.dropbox.fetch_file('/albums/1989/style.mp3').then(function() {
         done('Should have failed.');
       }, function(reason) {
         reason.message.should.be.exactly('Network Failure');
@@ -196,7 +196,7 @@ describe('Dropbox', function() {
   describe('delta()', function() {
 
     it('makes a delta request with an empty cursor', function(done) {
-      var delta = nock('https://api.dropbox.com:443', {"encodedQueryParams":true})
+      var delta = nock('https://api.dropbox.com:443', {'encodedQueryParams':true})
         .post('/1/delta')
         .reply(200, {has_more: false, entries: [1, 2, 3]});
 
@@ -208,11 +208,11 @@ describe('Dropbox', function() {
     });
 
     it('handles application level errors', function(done) {
-      var delta = nock('https://api.dropbox.com:443', {"encodedQueryParams":true})
+      var delta = nock('https://api.dropbox.com:443', {'encodedQueryParams':true})
         .post('/1/delta')
         .reply(401, {error: 'bloop'});
 
-      this.dropbox.delta().then(function(res) {
+      this.dropbox.delta().then(function() {
         done('Should have failed.');
       }, function(reason) {
         reason.message.should.be.exactly('bloop');
@@ -222,7 +222,7 @@ describe('Dropbox', function() {
     });
 
     it('makes a delta request with a cursor', function(done) {
-      var delta = nock('https://api.dropbox.com:443', {"encodedQueryParams":true})
+      var delta = nock('https://api.dropbox.com:443', {'encodedQueryParams':true})
         .post('/1/delta', 'cursor=1989')
         .reply(200, {has_more: false, entries: [1, 2, 3]});
 
@@ -234,15 +234,15 @@ describe('Dropbox', function() {
     });
 
     it('unpages a many delta requests', function(done) {
-      var page1 = nock('https://api.dropbox.com:443', {"encodedQueryParams":true})
+      var page1 = nock('https://api.dropbox.com:443', {'encodedQueryParams':true})
         .post('/1/delta', 'cursor=1989')
         .reply(200, {has_more: true, entries: [1, 2, 3]});
 
-      var page2 = nock('https://api.dropbox.com:443', {"encodedQueryParams":true})
+      var page2 = nock('https://api.dropbox.com:443', {'encodedQueryParams':true})
         .post('/1/delta', 'cursor=1989')
         .reply(200, {has_more: true, entries: [4, 5]});
 
-      var page3 = nock('https://api.dropbox.com:443', {"encodedQueryParams":true})
+      var page3 = nock('https://api.dropbox.com:443', {'encodedQueryParams':true})
         .post('/1/delta', 'cursor=1989')
         .reply(200, {has_more: false, entries: [6]});
 
@@ -264,7 +264,7 @@ describe('Dropbox', function() {
     });
 
     it('pulls a file off the network and saves it to disk', function(done) {
-      var sync = nock('https://api-content.dropbox.com:443', {"encodedQueryParams":true})
+      var sync = nock('https://api-content.dropbox.com:443', {'encodedQueryParams':true})
         .get('/1/files/auto/albums/1989/style.mp3')
         .reply(200, 'we never go out of style');
 
@@ -287,7 +287,7 @@ describe('Dropbox', function() {
     });
 
     it('deletes folders locally', function(done) {
-      this.dropbox.sync_folder_or_delete(['albums/1989', null]).then(function(res) {
+      this.dropbox.sync_folder_or_delete(['albums/1989', null]).then(function() {
         fs.readdir('local/albums', function(err, files) {
           if(err) { done(err); return; }
           files.should.have.length(0);
@@ -297,7 +297,7 @@ describe('Dropbox', function() {
     });
 
     it('creates folders locally', function(done) {
-      this.dropbox.sync_folder_or_delete(['albums/in-rainbows', {}]).then(function(res) {
+      this.dropbox.sync_folder_or_delete(['albums/in-rainbows', {}]).then(function() {
         fs.readdir('local/albums/in-rainbows', function(err, files) {
           if(err) { done(err); return; }
           files.should.have.length(0);
@@ -307,7 +307,7 @@ describe('Dropbox', function() {
     });
 
     it('resets folders locally', function(done) {
-      this.dropbox.sync_folder_or_delete(['albums/1989', {}]).then(function(res) {
+      this.dropbox.sync_folder_or_delete(['albums/1989', {}]).then(function() {
         fs.readdir('local/albums/1989', function(err, files) {
           if(err) { done(err); return; }
           files.should.have.length(0);
@@ -328,11 +328,11 @@ describe('Dropbox', function() {
     });
 
     it('syncs a list of entries', function(done) {
-      var nude = nock('https://api-content.dropbox.com:443', {"encodedQueryParams":true})
+      var nude = nock('https://api-content.dropbox.com:443', {'encodedQueryParams':true})
         .get('/1/files/auto/albums/radiohead/in-rainbows/nude.mp3')
         .reply(200, 'dont get any big ideas');
 
-      var trouble = nock('https://api-content.dropbox.com:443', {"encodedQueryParams":true})
+      var trouble = nock('https://api-content.dropbox.com:443', {'encodedQueryParams':true})
         .get('/1/files/auto/albums/taylor-swift/red/trouble.mp3')
         .reply(200, 'i knew you were trouble');
 
@@ -386,8 +386,8 @@ describe('Dropbox', function() {
     });
 
     it('syncs', function(done) {
-      var page1 = nock('https://api.dropbox.com:443', {"encodedQueryParams":true})
-        .post('/1/delta', "cursor=1989")
+      var page1 = nock('https://api.dropbox.com:443', {'encodedQueryParams':true})
+        .post('/1/delta', 'cursor=1989')
         .reply(200, {cursor: 1990, has_more: true, entries: [
           ['albums/radiohead/in-rainbows/nude.mp3', {is_dir: false}],
           ['albums/1989', null],
@@ -395,19 +395,19 @@ describe('Dropbox', function() {
           ['albums/radiohead/amnesiac', {is_dir: true}]
         ]});
 
-      var page2 = nock('https://api.dropbox.com:443', {"encodedQueryParams":true})
-        .post('/1/delta', "cursor=1989")
+      var page2 = nock('https://api.dropbox.com:443', {'encodedQueryParams':true})
+        .post('/1/delta', 'cursor=1989')
         .reply(200, {cursor: 1990, has_more: false, entries: [
           ['albums/grizzly-bear/veckatimest', {is_dir: true}],
           ['albums/1989/style.mp3', null],
           ['albums/taylor-swift/red/trouble.mp3', {is_dir: false}]
         ]});
 
-      var nude = nock('https://api-content.dropbox.com:443', {"encodedQueryParams":true})
+      var nude = nock('https://api-content.dropbox.com:443', {'encodedQueryParams':true})
         .get('/1/files/auto/albums/radiohead/in-rainbows/nude.mp3')
         .reply(200, 'dont get any big ideas');
 
-      var trouble = nock('https://api-content.dropbox.com:443', {"encodedQueryParams":true})
+      var trouble = nock('https://api-content.dropbox.com:443', {'encodedQueryParams':true})
         .get('/1/files/auto/albums/taylor-swift/red/trouble.mp3')
         .reply(200, 'i knew you were trouble');
 
@@ -426,14 +426,14 @@ describe('Dropbox', function() {
     });
 
     it('deletes the cursor if anything breaks', function(done) {
-      var delta = nock('https://api.dropbox.com:443', {"encodedQueryParams":true})
-        .post('/1/delta', "cursor=1989")
+      var delta = nock('https://api.dropbox.com:443', {'encodedQueryParams':true})
+        .post('/1/delta', 'cursor=1989')
         .replyWithError('doh');
 
       this.dropbox.sync().then(function() {
         done('Should not have resolved.');
       }, function(reason) {
-        fs.readFile('local/.pony-token', function(err, content) {
+        fs.readFile('local/.pony-token', function(err) {
           reason.message.should.be.exactly('doh');
           if(err) { done(); return; }
           done('Cursor should have been deleted.');

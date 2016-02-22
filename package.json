@@ -5,6 +5,7 @@
   "repository": "https://github.com/griffinmyers/pony-express",
   "scripts": {
     "start": "node app.js",
+    "lint": "eslint . --ext .js",
     "test": "node_modules/mocha/bin/mocha --reporter spec 'test/**/*.js'"
   },
   "dependencies": {
@@ -31,6 +32,7 @@
     "winston": "2.1.1"
   },
   "devDependencies": {
+    "eslint": "^2.2.0",
     "metalsmith-serve": "0.0.3",
     "metalsmith-watch": "0.2.0",
     "mocha": "2.4.5",

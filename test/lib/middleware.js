@@ -227,7 +227,7 @@ describe('Middlware', function() {
     });
 
     it('deals with parsed dates', function() {
-      metalsmith = {
+      var metalsmith = {
         '_metadata': {
           'posts': [
             {date: new Date('2015-01-01'), title: 'Post 1'},

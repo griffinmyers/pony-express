@@ -22,7 +22,7 @@ module.exports = {
   deploy_sync: function(req, res) {
     deploy(req.body.id).then(function() {
       res.status(200).send('ok.');
-    }, function(reason) {
+    }, function() {
       res.status(500).send('Deploy Failed.');
     }).done();
   }
