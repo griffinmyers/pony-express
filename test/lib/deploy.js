@@ -1,6 +1,6 @@
 var deploy = require('../../lib/deploy.js');
 
-describe.only('Deploy', function() {
+describe('Deploy', function() {
 
   describe('deploy()', function() {
 
