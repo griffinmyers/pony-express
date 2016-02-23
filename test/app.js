@@ -4,6 +4,7 @@ var app = require('../app');
 var request = require('supertest');
 var qs = require('querystring');
 var nock = require('nock');
+var crypto = require('crypto');
 
 describe('App', function() {
 
@@ -74,10 +75,10 @@ describe('App', function() {
 
       request(app)
         .get('/authorize/redirect?code=' + code)
-        .expect(200, function() {
+        .expect(200, function(err) {
           dropbox.done();
           s3.done();
-          done();
+          done(err);
         });
     });
   });
@@ -92,11 +93,39 @@ describe('App', function() {
 
       request(app)
         .get('/authorize/redirect?code=' + code)
-        .expect(500, function() {
+        .expect(500, function(err) {
           dropbox.done();
-          done();
+          done(err);
         });
     });
   });
+
+  describe.only('POST /deploy', function() {
+    it('requires a valid dropbox signature', function(done) {
+      request(app)
+        .post('/deploy')
+        .send({mac: 'demarco'})
+        .expect(403, done);
+    });
+
+    it('passes through to the controller with a valid signature', function(done) {
+      var secret = process.env.DROPBOX_APP_SECRET
+      process.env.DROPBOX_APP_SECRET = 'secret';
+
+      var payload = {mac: 'demarco'};
+      var buf = JSON.stringify(payload)
+      var hmac = crypto.createHmac('sha256', process.env.DROPBOX_APP_SECRET).update(buf);
+
+      request(app)
+        .post('/deploy')
+        .send(payload)
+        .set('X-DROPBOX-SIGNATURE', hmac.digest('hex'))
+        .expect(500, function(err) {
+          done(err);
+          process.env.DROPBOX_APP_SECRET = secret;
+        });
+    });
+  });
+
 });
 
