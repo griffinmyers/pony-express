@@ -1,4 +1,4 @@
-var should = require('should');
+require('should');
 var nock = require('nock');
 var Store = require('../../lib/store.js');
 

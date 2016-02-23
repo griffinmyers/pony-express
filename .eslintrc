@@ -6,7 +6,7 @@
   },
   "rules": {
     "quotes": [2, "single"],
-    "no-unused-vars": [2, {"args": "none", "varsIgnorePattern": "^should$"}],
+    "no-unused-vars": [2, {"args": "none"}],
     "no-octal": [0]
   },
   "globals": {"root_require": true}

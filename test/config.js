@@ -1,5 +1,5 @@
+require('should');
 var path = require('path');
-var should = require('should');
 
 describe('Config', function(){
   describe('default', function() {

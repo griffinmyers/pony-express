@@ -1,7 +1,7 @@
+require('should');
 var url = require('url');
 var app = require('../app');
 var request = require('supertest');
-var should = require('should');
 var qs = require('querystring');
 var nock = require('nock');
 

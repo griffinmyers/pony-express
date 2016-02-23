@@ -1,4 +1,4 @@
-var should = require('should');
+require('should');
 var middleware = require('../../lib/middleware');
 var bind_template = middleware.bind_template;
 var clean = middleware.clean;

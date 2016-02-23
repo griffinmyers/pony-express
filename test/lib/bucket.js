@@ -1,4 +1,4 @@
-var should = require('should');
+require('should');
 var nock = require('nock');
 var Bucket = require('../../lib/bucket.js');
 var mockfs = require('mock-fs');
