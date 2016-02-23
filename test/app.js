@@ -8,7 +8,6 @@ var qs = require('querystring');
 var nock = require('nock');
 var crypto = require('crypto');
 var config = require('../config');
-var mockfs = require('mock-fs');
 var rmdir = require('rimraf');
 var mkdirp = require('mkdirp');
 
