@@ -101,6 +101,17 @@ describe('App', function() {
   });
 
   describe.only('POST /deploy', function() {
+
+    beforeEach(function() {
+      this.secret = process.env.DROPBOX_APP_SECRET
+      process.env.DROPBOX_APP_SECRET = 'secret';
+    });
+
+    afterEach(function() {
+      process.env.DROPBOX_APP_SECRET = this.secret;
+      delete this.secret;
+    });
+
     it('requires a valid dropbox signature', function(done) {
       request(app)
         .post('/deploy')
@@ -109,9 +120,6 @@ describe('App', function() {
     });
 
     it('passes through to the controller with a valid signature', function(done) {
-      var secret = process.env.DROPBOX_APP_SECRET
-      process.env.DROPBOX_APP_SECRET = 'secret';
-
       var payload = {mac: 'demarco'};
       var buf = JSON.stringify(payload)
       var hmac = crypto.createHmac('sha256', process.env.DROPBOX_APP_SECRET).update(buf);
@@ -120,11 +128,9 @@ describe('App', function() {
         .post('/deploy')
         .send(payload)
         .set('X-DROPBOX-SIGNATURE', hmac.digest('hex'))
-        .expect(500, function(err) {
-          done(err);
-          process.env.DROPBOX_APP_SECRET = secret;
-        });
+        .expect(500, done);
     });
+
   });
 
 });
