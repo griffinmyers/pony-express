@@ -14,7 +14,7 @@
     "express": "4.11.1",
     "glob": "4.3.5",
     "jade": "1.9.1",
-    "lodash": "3.3.0",
+    "lodash": "4.5.1",
     "metalsmith": "1.0.1",
     "metalsmith-collections": "0.7.0",
     "metalsmith-layouts": "1.6.4",
