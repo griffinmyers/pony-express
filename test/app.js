@@ -180,7 +180,7 @@ describe('App', function() {
       rmdir('src/taylor', function() {
         mkdirp('src/taylor/_code/templates', function() {
           fs.writeFile('src/taylor/.pony-token', '1989', function() {
-            fs.writeFile('src/taylor/_code/templates/partial.jade', '!= contents\n', done);
+            fs.writeFile('src/taylor/_code/templates/layout.jade', '#page\n  != contents\n', done);
           });
         });
       });
@@ -192,7 +192,7 @@ describe('App', function() {
             {name: 'markdown', args: {gfm: true, tables: true, breaks: false, pedantic: false, sanitize: false, smartLists: true, smartypants: true}},
             {name: 'bind_template'},
             {name: 'partial'},
-            {name: 'templates', args: {engine: 'jade', directory: path.join(source, '_code', 'templates')}},
+            {name: 'layouts', args: {engine: 'jade', directory: path.join(source, '_code', 'templates')}},
             {name: 'clean', args: '_code'},
             {name: 'clean', args: '.pony-token'}
           ];
@@ -241,15 +241,15 @@ describe('App', function() {
 
       var index = nock('https://api-content.dropbox.com:443')
         .get('/1/files/auto/index.md')
-        .reply(200, '# Taylor Swift\n');
+        .reply(200, '---\ntemplate: layout\n---\n\n# Taylor Swift\n');
 
       var album = nock('https://api-content.dropbox.com:443')
         .get('/1/files/auto/albums/1989.md')
-        .reply(200, '*1989*');
+        .reply(200, '---\nlayout: layout\n---\n\n*1989*');
 
       var manifest = nock('https://s3.amazonaws.com:443')
         .get('/taylorswift.com/.pony-manifest')
-        .reply(200, {'index.html': '6710d1f2c8921677c8ffcabadcf9138c329fc3fc'});
+        .reply(200, {'index.html': '30972b7f137ade34641c799cf377c6a17ad84bba'});
 
       var album_upload = nock('https://s3.amazonaws.com:443')
         .put('/taylorswift.com/albums/1989.html')
@@ -266,14 +266,18 @@ describe('App', function() {
           fs.readdir('build/taylor', function(e, files) {
             if(e) { done(e); return; }
             files.should.have.length(2);
-            key.done();
-            delta.done();
-            index.done();
-            album.done();
-            manifest.done();
-            album_upload.done();
-            put_manifest.done();
-            done(err);
+            fs.readFile('build/taylor/index.html', function(f, content) {
+              if(f) { done(f); return; }
+              content.toString().should.be.exactly('<div id="page"><h1 id="taylor-swift">Taylor Swift</h1>\n</div>');
+              key.done();
+              delta.done();
+              index.done();
+              album.done();
+              manifest.done();
+              album_upload.done();
+              put_manifest.done();
+              done(err);
+            });
           });
         });
     });
