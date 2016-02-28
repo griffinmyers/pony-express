@@ -86,11 +86,26 @@ describe('Bucket', function() {
   });
 
   describe('del()', function() {
-    it('deletes', function(done) {
+    it('deletes files', function(done) {
       var files = ['a/b.html', 'c.json'];
       var amazon = nock('https://remote.s3.amazonaws.com:443')
         .post('/?delete', '<Delete xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Object><Key>a/b.html</Key></Object><Object><Key>c.json</Key></Object></Delete>')
         .reply(200, '<?xml version="1.0" encoding="UTF-8"?><DeleteResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Deleted><Key>c.json</Key></Deleted><Deleted><Key>a/b.html</Key></Deleted></DeleteResult>');
+
+      this.bucket.del(files).then(function(res) {
+        res.should.have.property('Deleted');
+        res.should.have.property('Errors');
+        res.Errors.should.be.empty;
+        amazon.done();
+        done();
+      }, done).done();
+    });
+
+    it('deletes a file', function(done) {
+      var files = 'a/b.html';
+      var amazon = nock('https://remote.s3.amazonaws.com:443')
+        .post('/?delete', '<Delete xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Object><Key>a/b.html</Key></Object></Delete>')
+        .reply(200, '<?xml version="1.0" encoding="UTF-8"?><DeleteResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Deleted><Key>a/b.html</Key></Deleted></DeleteResult>');
 
       this.bucket.del(files).then(function(res) {
         res.should.have.property('Deleted');
