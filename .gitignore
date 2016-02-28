@@ -2,6 +2,7 @@ node_modules
 src
 build/*
 *.log
+coverage
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*

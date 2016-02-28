@@ -105,6 +105,18 @@ describe('App', function() {
     });
   });
 
+  describe('GET /deploy', function() {
+    it('needs a challenge token', function(done) {
+      request(app)
+        .get('/deploy')
+        .query({challenge: 'taylor-swift'})
+        .expect(200, function(err, body) {
+          body.text.should.be.exactly('taylor-swift');
+          done(err);
+        });
+    })
+  });
+
   describe('POST /deploy', function() {
 
     beforeEach(function() {
@@ -191,6 +203,7 @@ describe('App', function() {
           return [
             {name: 'markdown', args: {gfm: true, tables: true, breaks: false, pedantic: false, sanitize: false, smartLists: true, smartypants: true}},
             {name: 'bind_template'},
+            {name: 'invalid_middlware'},
             {name: 'partial'},
             {name: 'layouts', args: {engine: 'jade', directory: path.join(source, '_code', 'templates')}},
             {name: 'clean', args: '_code'},
@@ -233,7 +246,7 @@ describe('App', function() {
 
       var delta = nock('https://api.dropbox.com:443')
         .post('/1/delta', 'cursor=1989')
-        .reply(200, {cursor: 2, has_more: false, entries: [
+        .reply(200, {cursor: 1989, has_more: false, entries: [
           ['index.md', {is_dir: false}],
           ['albums/1989.md', {is_dir: false}],
           ['albums', {is_dir: true}]
@@ -287,7 +300,29 @@ describe('App', function() {
         });
     });
 
-  })
+    it('reports an error if the build fails', function(done) {
+
+      var key = nock('https://dropbox-keys.s3.amazonaws.com:443')
+        .get('/taylor')
+        .reply(404)
+
+      var set_error = nock('https://s3.amazonaws.com:443')
+        .put('/taylorswift.com/' + config.error_path)
+        .reply(200);
+
+      request(app)
+        .post('/deploy/sync')
+        .send({id: 'taylor'})
+        .expect(200, function(err) {
+          if(err) { done(err); return; }
+          key.done();
+          set_error.done();
+          done(err);
+        });
+
+    });
+
+  });
 
 });
 

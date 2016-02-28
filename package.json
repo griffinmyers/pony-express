@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node app.js",
     "lint": "eslint . --ext .js",
-    "test": "node_modules/mocha/bin/mocha --reporter spec 'test/**/*.js'"
+    "test": "node_modules/.bin/mocha --reporter spec 'test/**/*.js'",
+    "coverage": "node_modules/.bin/istanbul cover node_modules/.bin/_mocha -- 'test/**/*.js'; open coverage/lcov-report/index.html"
   },
   "dependencies": {
     "aws-sdk": "2.1.7",
@@ -33,6 +34,7 @@
   },
   "devDependencies": {
     "eslint": "2.2.0",
+    "istanbul": "^0.4.2",
     "metalsmith-serve": "0.0.3",
     "metalsmith-watch": "0.2.0",
     "mocha": "2.4.5",
