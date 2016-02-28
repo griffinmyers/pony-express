@@ -259,6 +259,10 @@ describe('App', function() {
         .put('/taylorswift.com/.pony-manifest')
         .reply(200);
 
+      var clear_error = nock('https://s3.amazonaws.com:443')
+        .post('/taylorswift.com?delete', /Delete/)
+        .reply(200, '');
+
       request(app)
         .post('/deploy/sync')
         .send({id: 'taylor'})
@@ -276,6 +280,7 @@ describe('App', function() {
               manifest.done();
               album_upload.done();
               put_manifest.done();
+              clear_error.done();
               done(err);
             });
           });

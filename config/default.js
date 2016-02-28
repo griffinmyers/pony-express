@@ -7,5 +7,6 @@ module.exports = {
   source: 'src',
   root: path.resolve(__dirname, '..'),
   key_bucket: 'dropbox-keys',
+  error_path: '_error/index.html',
   users: require('./users')
 };
