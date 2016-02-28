@@ -123,22 +123,38 @@ describe('Bucket', function() {
     });
   });
 
-  describe('upload()', function() {
+  describe('upload_path()', function() {
     before(function() {
       mockfs({'local/loveisall.jpg': new Buffer([8, 6, 7, 5, 3, 0, 9])});
     });
 
-    it('uploads with a guessed mimetype', function(done) {
+    it('uploads from a path with a guessed mimetype', function(done) {
       var amazon = nock('https://remote.s3.amazonaws.com:443')
         .put('/loveisall.jpg', '\b\u0006\u0007\u0005\u0003\u0000\t')
         .reply(200, '');
 
-      this.bucket.upload('loveisall.jpg').then(function(res) {
+      this.bucket.upload_path('loveisall.jpg').then(function(res) {
         res.should.have.property('Location');
         amazon.done();
         done();
       }, done).done();
     });
+  });
+
+  describe('upload()', function() {
+
+    it('uploads with passed key, contents, and mimetype', function(done) {
+      var amazon = nock('https://remote.s3.amazonaws.com:443')
+        .put('/a/b.html', '<div></div>')
+        .reply(200, '');
+
+      this.bucket.upload('a/b.html', '<div></div>', 'html').then(function(res) {
+        res.should.have.property('Location');
+        amazon.done();
+        done();
+      }, done).done();
+    });
+
   });
 
   describe('upload_all()', function() {
