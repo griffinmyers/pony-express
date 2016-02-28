@@ -1,7 +1,5 @@
 # Pony Express
 
-[ponyexprss](http://ponyexprss.com/)
-
 ```
 +-------------+      +----------------+      +-------------+
 |             |      |                |      |             |
@@ -19,11 +17,13 @@
 
 A teeny server for building & deploying static websites backed by dropbox. Your website is immediately updated when you save a file. 
 
-Recap:
-
-* easy editing
-* the cheapest to host
-* the fastest response times
+* Easily edit your page by updating copy in markdown files in your dropbox. 
+    - Use a convenient editor like [Ulysses](http://www.ulyssesapp.com/) with markdown and dropbox support for editing on desktop or iPad.
+    - Or use something like the [Byword](https://bywordapp.com/) iPhone app when you're on the go.
+* New pages are as easy as creating a new file. Your site's url scheme mimics the dropbox directory structure. 
+* Cheap to host.  You're just serving up static files on S3. 
+* Fast response times. It's a static site so use the AWS CDN for supreme speeds.
+* Baked-in blog infrastructure. 
 
 ## Live Examples
 
