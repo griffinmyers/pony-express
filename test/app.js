@@ -322,6 +322,28 @@ describe('App', function() {
 
     });
 
+    it('reports an error if both the build fails and ErrorReporter fails', function(done) {
+
+      var key = nock('https://dropbox-keys.s3.amazonaws.com:443')
+        .get('/taylor')
+        .reply(404)
+
+      var set_error = nock('https://s3.amazonaws.com:443')
+        .put('/taylorswift.com/' + config.error_path)
+        .reply(404);
+
+      request(app)
+        .post('/deploy/sync')
+        .send({id: 'taylor'})
+        .expect(200, function(err) {
+          if(err) { done(err); return; }
+          key.done();
+          set_error.done();
+          done(err);
+        });
+
+    });
+
   });
 
 });
