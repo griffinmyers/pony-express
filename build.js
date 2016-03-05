@@ -34,7 +34,7 @@ var is_script = !module.parent;
 
 if(is_fetch) {
   store.get(id).then(function(result) {
-    return new Dropbox(result.Body.toString(), path.join(config.source, 'fetch')).sync();
+    return new Dropbox(result, path.join(config.source, 'fetch')).sync();
   }).done();
 }
 

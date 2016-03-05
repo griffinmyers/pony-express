@@ -15,7 +15,7 @@ describe('Store', function() {
         .reply(200, 'bleep');
 
       this.store.get('boop').then(function(res) {
-        res.Body.toString().should.be.exactly('bleep');
+        res.should.be.exactly('bleep');
         amazon.done();
         done();
       }, done).done();
@@ -27,12 +27,12 @@ describe('Store', function() {
         .reply(200, 'bleep');
 
       this.store.get('boop').then(function(res) {
-        res.Body.toString().should.be.exactly('bleep');
+        res.should.be.exactly('bleep');
         amazon.done();
       }).then(function() {
         return this.store.get('boop');
       }.bind(this)).then(function(res) {
-        res.Body.toString().should.be.exactly('bleep');
+        res.should.be.exactly('bleep');
         done();
       }, done).done();
     });
@@ -45,11 +45,11 @@ describe('Store', function() {
       .reply(200, 'bleep');
 
       uncached_store.get('boop').then(function(res) {
-        res.Body.toString().should.be.exactly('bleep');
+        res.should.be.exactly('bleep');
       }).then(function() {
         return uncached_store.get('boop');
       }).then(function(res) {
-        res.Body.toString().should.be.exactly('bleep');
+        res.should.be.exactly('bleep');
         amazon.done();
         done()
       }, done).done();
