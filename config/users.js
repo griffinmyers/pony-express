@@ -2,7 +2,7 @@ var path = require('path');
 var moment = require('moment');
 
 module.exports = {
-  43720278: {
+  'dbid:AAAmODwud0T-852J1qsHTowRprA7fLuQACY': {
     bucket: 'joeshaner.com',
     middleware: function(source) {
       return [
@@ -27,7 +27,7 @@ module.exports = {
       ];
     }
   },
-  544017: {
+  'dbid:AAAkhz_MuWd2QM3Z_OsIX4_zI6a8oGN7LEs': {
     bucket: 'wgm.cool',
     middleware: function(source) {
       return [
@@ -48,7 +48,7 @@ module.exports = {
       ];
     }
   },
-  59006125: {
+  'dbid:AACb7RhYLFLPXFdpsfpXQl7H_svGqaZy4TU': {
     bucket: 'www.fallcreekfarm.org',
     middleware: function(source) {
       return [
@@ -71,7 +71,7 @@ module.exports = {
       ];
     }
   },
-  103170856: {
+  'dbid:AAB0k_SPy_bqLAEy9RGogi8phuxn5CkswyU': {
     bucket: 'ramblinrunner.com',
     middleware: function(source) {
       return [
@@ -94,7 +94,7 @@ module.exports = {
       ];
     }
   },
-  8939113: {
+  'dbid:AAAsnaSC-xzHIgiN9OGhS8HwalfvK3cpfg0': {
     bucket: 'brandonkreitler.com',
     middleware: function(source) {
       return [
@@ -111,7 +111,7 @@ module.exports = {
       ]
     }
   },
-  69161639: {
+  'dbid:AAAokovl6EtZgXd7CFo3iy0RXjJpTeqogVc': {
     bucket: 'cragcation.com',
     middleware: function(source) {
       return [

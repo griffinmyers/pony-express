@@ -10,7 +10,7 @@ module.exports = {
     res.redirect(url.format({
       protocol: 'https',
       hostname: 'dropbox.com',
-      pathname: '/1/oauth2/authorize',
+      pathname: '/oauth2/authorize',
       query: {
         client_id: process.env.DROPBOX_APP_KEY,
         response_type: 'code',
@@ -23,8 +23,8 @@ module.exports = {
       method: 'POST',
       url: url.format({
         protocol: 'https',
-        hostname: 'api.dropbox.com',
-        pathname: '/1/oauth2/token'
+        hostname: 'api.dropboxapi.com',
+        pathname: '/oauth2/token'
       }),
       form: {
         client_id: process.env.DROPBOX_APP_KEY,

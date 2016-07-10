@@ -40,7 +40,7 @@ describe('App', function() {
 
           parsed.hostname.should.be.exactly('dropbox.com');
           parsed.protocol.should.be.exactly('https:');
-          parsed.pathname.should.be.exactly('/1/oauth2/authorize');
+          parsed.pathname.should.be.exactly('/oauth2/authorize');
           query.should.have.property('client_id').which.is.a.String;
           query.should.have.property('response_type', 'code');
           query.should.have.property('redirect_uri', 'http://localhost:3000/authorize/redirect');
@@ -60,8 +60,8 @@ describe('App', function() {
       process.env.DROPBOX_APP_KEY = key;
       process.env.DROPBOX_APP_SECRET = secret;
 
-      var dropbox = nock('https://api.dropbox.com')
-        .post('/1/oauth2/token', function(body) {
+      var dropbox = nock('https://api.dropboxapi.com')
+        .post('/oauth2/token', function(body) {
           if(body.client_id === key &&
              body.client_secret === secret &&
              body.code === code &&
@@ -92,8 +92,8 @@ describe('App', function() {
     it('throws if there is an error with dropbox', function(done) {
 
       var code = '1234';
-      var dropbox = nock('https://api.dropbox.com')
-        .post('/1/oauth2/token')
+      var dropbox = nock('https://api.dropboxapi.com')
+        .post('/oauth2/token')
         .reply(500, {error: 500, error_description: 'Nope'});
 
       request(app)
@@ -244,20 +244,24 @@ describe('App', function() {
         .get('/taylor')
         .reply(200, 'taylor-dropbox-key');
 
-      var delta = nock('https://api.dropbox.com:443')
-        .post('/1/delta', 'cursor=1989')
+      var list_folder = nock('https://api.dropboxapi.com:443')
+        .post('/2/files/list_folder/continue', {cursor: '1989'})
         .reply(200, {cursor: 1989, has_more: false, entries: [
-          ['index.md', {is_dir: false}],
-          ['albums/1989.md', {is_dir: false}],
-          ['albums', {is_dir: true}]
+          {path_lower: '/index.md', '.tag': 'file'},
+          {path_lower: '/albums/1989.md', '.tag': 'file'},
+          {path_lower: '/albums', '.tag': 'folder'}
         ]});
 
-      var index = nock('https://api-content.dropbox.com:443')
-        .get('/1/files/auto/index.md')
+      var index = nock('https://content.dropboxapi.com:443', {
+          reqheaders: {'Dropbox-API-Arg': '{"path":"/index.md"}'}
+        })
+        .get('/2/files/download')
         .reply(200, '---\ntemplate: layout\n---\n\n# Taylor Swift\n');
 
-      var album = nock('https://api-content.dropbox.com:443')
-        .get('/1/files/auto/albums/1989.md')
+      var album = nock('https://content.dropboxapi.com:443', {
+          reqheaders: {'Dropbox-API-Arg': '{"path":"/albums/1989.md"}'}
+        })
+        .get('/2/files/download')
         .reply(200, '---\nlayout: layout\n---\n\n*1989*');
 
       var manifest = nock('https://s3.amazonaws.com:443')
@@ -287,7 +291,7 @@ describe('App', function() {
               if(f) { done(f); return; }
               content.toString().should.be.exactly('<div id="page"><h1 id="taylor-swift">Taylor Swift</h1>\n</div>');
               key.done();
-              delta.done();
+              list_folder.done();
               index.done();
               album.done();
               manifest.done();
