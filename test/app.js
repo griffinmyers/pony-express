@@ -149,7 +149,7 @@ describe('App', function() {
     });
 
     it('needs a user id', function(done) {
-      var payload = {delta: {users: []}};
+      var payload = {list_folder: {accounts: []}};
       var buf = JSON.stringify(payload)
       var hmac = crypto.createHmac('sha256', process.env.DROPBOX_APP_SECRET).update(buf);
 
@@ -161,7 +161,7 @@ describe('App', function() {
     });
 
     it('accepts a single user id', function(done) {
-      var payload = {delta: {users: [1]}};
+      var payload = {list_folder: {accounts: [1]}};
       var buf = JSON.stringify(payload)
       var hmac = crypto.createHmac('sha256', process.env.DROPBOX_APP_SECRET).update(buf);
 
@@ -173,7 +173,7 @@ describe('App', function() {
     });
 
     it('accepts a many user ids', function(done) {
-      var payload = {delta: {users: [1, 2, 3]}};
+      var payload = {list_folder: {accounts: [1, 2, 3]}};
       var buf = JSON.stringify(payload)
       var hmac = crypto.createHmac('sha256', process.env.DROPBOX_APP_SECRET).update(buf);
 

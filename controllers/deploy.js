@@ -7,16 +7,16 @@ module.exports = {
     res.send(req.query.challenge);
   },
   deploy: function(req, res) {
-    var users = req.body && req.body.delta && req.body.delta.users || [];
+    var accounts = _.get(req, 'body.list_folder.accounts', []);
 
-    if(users.length){
-      logger.info('Deploying for users [', users.join(', '), ']');
-      process.nextTick(_.partial(deploy, users));
+    if(accounts.length){
+      logger.info('Deploying for accounts [', accounts.join(', '), ']');
+      process.nextTick(_.partial(deploy, accounts));
       res.status(200).send('ok');
     }
     else {
-      logger.error('No users provided.');
-      res.status(500).send('No users provided.');
+      logger.error('No accounts provided.');
+      res.status(500).send('No accounts provided.');
     }
   },
   deploy_sync: function(req, res) {
