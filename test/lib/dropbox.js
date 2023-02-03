@@ -222,7 +222,7 @@ describe('Dropbox', function() {
     });
 
     it('will retry given a cursor error by reseting and trying without a cursor', function(done) {
-      mockfs({'local/albums/1989/out-of-the-woods.mp3': 2});
+      mockfs({'local/albums/1989/out-of-the-woods.mp3': '2'});
 
       var list_folder_fail = nock('https://api.dropboxapi.com:443')
         .post('/2/files/list_folder/continue', {cursor: '1989'})
@@ -310,7 +310,7 @@ describe('Dropbox', function() {
   describe('sync_file()', function() {
 
     before(function() {
-      mockfs({'local/albums/1989/out-of-the-woods.mp3': 2});
+      mockfs({'local/albums/1989/out-of-the-woods.mp3': '2'});
     });
 
     it('pulls a file off the network and saves it to disk', function(done) {
@@ -335,7 +335,7 @@ describe('Dropbox', function() {
   describe('sync_folder()', function() {
 
     before(function() {
-      mockfs({'local/albums/1989/out-of-the-woods.mp3': 2});
+      mockfs({'local/albums/1989/out-of-the-woods.mp3': '2'});
     });
 
     it('creates folders locally', function(done) {
@@ -363,7 +363,7 @@ describe('Dropbox', function() {
   describe('sync_delete()', function() {
 
     before(function() {
-      mockfs({'local/albums/1989/out-of-the-woods.mp3': 2});
+      mockfs({'local/albums/1989/out-of-the-woods.mp3': '2'});
     });
 
     it('deletes folders locally', function(done) {

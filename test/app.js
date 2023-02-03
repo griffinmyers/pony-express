@@ -1,4 +1,4 @@
-require('should');
+var should = require('should');
 var fs = require('fs');
 var path = require('path');
 var url = require('url');
@@ -41,9 +41,9 @@ describe('App', function() {
           parsed.hostname.should.be.exactly('dropbox.com');
           parsed.protocol.should.be.exactly('https:');
           parsed.pathname.should.be.exactly('/oauth2/authorize');
-          query.should.have.property('client_id').which.is.a.String;
-          query.should.have.property('response_type', 'code');
-          query.should.have.property('redirect_uri', 'http://localhost:3000/authorize/redirect');
+          should(query.client_id).is.a.String;
+          should(query.response_type).equal('code');
+          should(query.redirect_uri).equal('http://localhost:3000/authorize/redirect');
         })
         .expect(302, done);
     });
@@ -246,7 +246,7 @@ describe('App', function() {
 
       var list_folder = nock('https://api.dropboxapi.com:443')
         .post('/2/files/list_folder/continue', {cursor: '1989'})
-        .reply(200, {cursor: 1989, has_more: false, entries: [
+        .reply(200, {cursor: '1989', has_more: false, entries: [
           {path_lower: '/index.md', '.tag': 'file'},
           {path_lower: '/albums/1989.md', '.tag': 'file'},
           {path_lower: '/albums', '.tag': 'folder'}
