@@ -3,7 +3,7 @@ var request = require('request');
 var Q = require('q');
 var config = root_require('config');
 var logger = root_require('lib').logger;
-var store = new (root_require('lib').Store)(config.key_bucket);
+var store = new (root_require('lib').Store)(config.key_bucket, config.s3_origin);
 
 module.exports = {
   authorize: function(req, res) {
@@ -21,11 +21,7 @@ module.exports = {
   redirect: function(req, res) {
     Q.nfcall(request, {
       method: 'POST',
-      url: url.format({
-        protocol: 'https',
-        hostname: 'api.dropboxapi.com',
-        pathname: '/oauth2/token'
-      }),
+      url: `${config.dropbox_api_origin}/oauth2/token`,
       form: {
         client_id: process.env.DROPBOX_APP_KEY,
         client_secret: process.env.DROPBOX_APP_SECRET,

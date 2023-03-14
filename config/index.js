@@ -6,7 +6,7 @@ var config = def;
 
 switch(process.env.NODE_ENV) {
   case 'dev':
-    config = _.merge(config, dev);
+    config = _.merge({}, config, dev);
     break;
 }
 

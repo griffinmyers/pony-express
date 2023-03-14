@@ -8,5 +8,8 @@ module.exports = {
   root: path.resolve(__dirname, '..'),
   key_bucket: 'dropbox-keys',
   error_path: '_error/index.html',
-  users: require('./users')
+  users: require('./users'),
+  dropbox_api_origin: 'http://localhost:4000',
+  dropbox_content_origin: 'http://localhost:4001',
+  s3_origin: 'http://localhost:4002'
 };

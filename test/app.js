@@ -4,22 +4,33 @@ var path = require('path');
 var url = require('url');
 var app = require('../app');
 var request = require('supertest');
-var qs = require('querystring');
-var nock = require('nock');
 var crypto = require('crypto');
 var config = require('../config');
 var rmdir = require('rimraf');
 var mkdirp = require('mkdirp');
+var qs = require('querystring');
+var { http, helpers: { res, match } } = require('wirepig');
+
+const port = (u) => parseInt(url.parse(u).port);
 
 describe('App', function() {
 
-  before(function() {
-    nock.enableNetConnect('127.0.0.1');
+  before(async function() {
+    this.dropbox_api = await http({ port: port(config.dropbox_api_origin) });
+    this.dropbox_content = await http({ port: port(config.dropbox_content_origin) });
+    this.s3 = await http({ port: port(config.s3_origin) });
   });
 
-  after(function() {
-    nock.cleanAll();
-    nock.disableNetConnect();
+  afterEach(function() {
+    this.dropbox_api.reset();
+    this.dropbox_content.reset();
+    this.s3.reset();
+  });
+
+  after(async function() {
+    await this.dropbox_api.teardown();
+    await this.dropbox_content.teardown();
+    await this.s3.teardown();
   })
 
   describe('GET /', function(){
@@ -60,31 +71,33 @@ describe('App', function() {
       process.env.DROPBOX_APP_KEY = key;
       process.env.DROPBOX_APP_SECRET = secret;
 
-      var dropbox = nock('https://api.dropboxapi.com')
-        .post('/oauth2/token', function(body) {
-          if(body.client_id === key &&
-             body.client_secret === secret &&
-             body.code === code &&
-             body.grant_type === 'authorization_code' &&
-             body.redirect_uri === 'http://localhost:3000/authorize/redirect') {
-            return true;
-          }
-        })
-        .reply(200, {uid: uid, access_token: access_token});
+      this.dropbox_api.mock({
+        req: {
+          method: 'POST',
+          pathname: '/oauth2/token',
+          body: match.form({
+            'client_id': 'key',
+            'client_secret': 'secret',
+            'code': '1234',
+            'grant_type': 'authorization_code',
+            'redirect_uri': 'http://localhost:3000/authorize/redirect'
+          }),
+        },
+        res: res.json({uid: uid, access_token: access_token}),
+      });
 
-      var s3 = nock('https://dropbox-keys.s3.amazonaws.com')
-        .put('/' + uid , function(body) {
-          return body === access_token;
-        })
-        .reply(200);
+      this.s3.mock({
+        req: {
+          method: 'PUT',
+          pathname: `/dropbox-keys/${uid}`,
+          body: 'access_token'
+        },
+        res: { statusCode: 200 }
+      });
 
       request(app)
         .get('/authorize/redirect?code=' + code)
-        .expect(200, function(err) {
-          dropbox.done();
-          s3.done();
-          done(err);
-        });
+        .expect(200, done);
     });
   });
 
@@ -92,16 +105,17 @@ describe('App', function() {
     it('throws if there is an error with dropbox', function(done) {
 
       var code = '1234';
-      var dropbox = nock('https://api.dropboxapi.com')
-        .post('/oauth2/token')
-        .reply(500, {error: 500, error_description: 'Nope'});
+      this.dropbox_api.mock({
+        req: { method: 'POST', pathname: '/oauth2/token' },
+        res: res.json(
+          {error: 500, error_description: 'Nope'},
+          { statusCode: 500 }
+        ),
+      });
 
       request(app)
         .get('/authorize/redirect?code=' + code)
-        .expect(500, function(err) {
-          dropbox.done();
-          done(err);
-        });
+        .expect(500, done);
     });
   });
 
@@ -240,45 +254,63 @@ describe('App', function() {
 
     it('deploys with a valid user id', function(done) {
 
-      var key = nock('https://dropbox-keys.s3.amazonaws.com:443')
-        .get('/taylor')
-        .reply(200, 'taylor-dropbox-key');
+      this.s3.mock({
+        req: { method: 'GET', pathname: '/dropbox-keys/taylor' },
+        res: res.text('taylor-dropbox-key'),
+      })
 
-      var list_folder = nock('https://api.dropboxapi.com:443')
-        .post('/2/files/list_folder/continue', {cursor: '1989'})
-        .reply(200, {cursor: '1989', has_more: false, entries: [
-          {path_lower: '/index.md', '.tag': 'file'},
-          {path_lower: '/albums/1989.md', '.tag': 'file'},
-          {path_lower: '/albums', '.tag': 'folder'}
-        ]});
-
-      var index = nock('https://content.dropboxapi.com:443', {
-          reqheaders: {'Dropbox-API-Arg': '{"path":"/index.md"}'}
+      this.dropbox_api.mock({
+        req: { method: 'POST', pathname: '/2/files/list_folder/continue', body: match.json({cursor: '1989'}) },
+        res: res.json({
+          cursor: '1989',
+          has_more: false,
+          entries: [
+            {path_lower: '/index.md', '.tag': 'file'},
+            {path_lower: '/albums/1989.md', '.tag': 'file'},
+            {path_lower: '/albums', '.tag': 'folder'}
+          ]
         })
-        .get('/2/files/download')
-        .reply(200, '---\ntemplate: layout\n---\n\n# Taylor Swift\n');
+      })
 
-      var album = nock('https://content.dropboxapi.com:443', {
-          reqheaders: {'Dropbox-API-Arg': '{"path":"/albums/1989.md"}'}
-        })
-        .get('/2/files/download')
-        .reply(200, '---\nlayout: layout\n---\n\n*1989*');
+      this.dropbox_content.mock({
+        req: {
+          method: 'GET',
+          pathname: '/2/files/download',
+          headers: {'Dropbox-API-Arg': '{"path":"/index.md"}'},
+        },
+        res: res.text('---\ntemplate: layout\n---\n\n# Taylor Swift\n')
+      });
 
-      var manifest = nock('https://s3.amazonaws.com:443')
-        .get('/taylorswift.com/.pony-manifest')
-        .reply(200, {'index.html': '30972b7f137ade34641c799cf377c6a17ad84bba'});
+      this.dropbox_content.mock({
+        req: {
+          method: 'GET',
+          pathname: '/2/files/download',
+          headers: {'Dropbox-API-Arg': '{"path":"/albums/1989.md"}'},
+        },
+        res: res.text('---\nlayout: layout\n---\n\n*1989*')
+      });
 
-      var album_upload = nock('https://s3.amazonaws.com:443')
-        .put('/taylorswift.com/albums/1989.html')
-        .reply(200, '');
+      this.s3.mock({
+        req: { method: 'GET', pathname: '/taylorswift.com/.pony-manifest' },
+        res: res.json({'index.html': '30972b7f137ade34641c799cf377c6a17ad84bba'})
+      });
 
-      var put_manifest = nock('https://s3.amazonaws.com:443')
-        .put('/taylorswift.com/.pony-manifest')
-        .reply(200);
+      this.s3.mock({
+        req: { method: 'PUT', pathname: '/taylorswift.com/albums/1989.html' },
+      });
 
-      var clear_error = nock('https://s3.amazonaws.com:443')
-        .post('/taylorswift.com?delete', /Delete/)
-        .reply(200, '');
+      this.s3.mock({
+        req: { method: 'PUT', pathname: '/taylorswift.com/.pony-manifest' },
+      });
+
+      this.s3.mock({
+        req: {
+          method: 'POST',
+          pathname: '/taylorswift.com',
+          query: '?delete',
+          body: '<Delete xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Object><Key>_error/index.html</Key></Object></Delete>'
+        },
+      });
 
       request(app)
         .post('/deploy/sync')
@@ -290,14 +322,6 @@ describe('App', function() {
             fs.readFile('build/taylor/index.html', function(f, content) {
               if(f) { done(f); return; }
               content.toString().should.be.exactly('<div id="page"><h1 id="taylor-swift">Taylor Swift</h1>\n</div>');
-              key.done();
-              list_folder.done();
-              index.done();
-              album.done();
-              manifest.done();
-              album_upload.done();
-              put_manifest.done();
-              clear_error.done();
               done(err);
             });
           });
@@ -306,46 +330,37 @@ describe('App', function() {
 
     it('reports an error if the build fails', function(done) {
 
-      var key = nock('https://dropbox-keys.s3.amazonaws.com:443')
-        .get('/taylor')
-        .reply(404)
+      this.s3.mock({
+        req: { method: 'GET', pathname: '/dropbox-keys/taylor' },
+        res: { statusCode: 404 }
+      })
 
-      var set_error = nock('https://s3.amazonaws.com:443')
-        .put('/taylorswift.com/' + config.error_path)
-        .reply(200);
+      this.s3.mock({
+        req: { method: 'PUT', pathname: `/taylorswift.com/${config.error_path}` },
+      })
 
       request(app)
         .post('/deploy/sync')
         .send({id: 'taylor'})
-        .expect(200, function(err) {
-          if(err) { done(err); return; }
-          key.done();
-          set_error.done();
-          done(err);
-        });
-
+        .expect(200, done);
     });
 
     it('reports an error if both the build fails and ErrorReporter fails', function(done) {
 
-      var key = nock('https://dropbox-keys.s3.amazonaws.com:443')
-        .get('/taylor')
-        .reply(404)
+      this.s3.mock({
+        req: { method: 'GET', pathname: '/dropbox-keys/taylor' },
+        res: { statusCode: 404 }
+      })
 
-      var set_error = nock('https://s3.amazonaws.com:443')
-        .put('/taylorswift.com/' + config.error_path)
-        .reply(404);
+      this.s3.mock({
+        req: { method: 'PUT', pathname: `/taylorswift.com/${config.error_path}` },
+        res: { statusCode: 404 }
+      })
 
       request(app)
         .post('/deploy/sync')
         .send({id: 'taylor'})
-        .expect(200, function(err) {
-          if(err) { done(err); return; }
-          key.done();
-          set_error.done();
-          done(err);
-        });
-
+        .expect(200, done);
     });
 
   });

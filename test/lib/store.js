@@ -1,34 +1,50 @@
 require('should');
-var nock = require('nock');
+var url = require('url');
+var config = require('../../config');
+var { http, helpers: { res } } = require('wirepig');
 var Store = require('../../lib/store.js');
+
+const port = (u) => parseInt(url.parse(u).port);
 
 describe('Store', function() {
 
-  beforeEach(function() {
-    this.store = new Store('bucket', true);
+  before(async function() {
+    this.s3 = await http({ port: port(config.s3_origin) });
   });
+
+  beforeEach(function() {
+    this.store = new Store('bucket', config.s3_origin, true);
+  });
+
+  afterEach(function() {
+    this.s3.reset();
+  });
+
+  after(async function() {
+    await this.s3.teardown();
+  })
 
   describe('get()', function() {
     it('gets something', function(done) {
-      var amazon = nock('https://bucket.s3.amazonaws.com:443')
-        .get('/boop')
-        .reply(200, 'bleep');
+      this.s3.mock({
+        req: { method: 'GET', pathname: '/bucket/boop' },
+        res: res.text('bleep')
+      })
 
       this.store.get('boop').then(function(res) {
         res.should.be.exactly('bleep');
-        amazon.done();
         done();
       }, done).done();
     });
 
     it('caches', function(done) {
-      var amazon = nock('https://bucket.s3.amazonaws.com:443')
-        .get('/boop')
-        .reply(200, 'bleep');
+      this.s3.mock({
+        req: { method: 'GET', pathname: '/bucket/boop' },
+        res: res.text('bleep')
+      })
 
       this.store.get('boop').then(function(res) {
         res.should.be.exactly('bleep');
-        amazon.done();
       }).then(function() {
         return this.store.get('boop');
       }.bind(this)).then(function(res) {
@@ -38,11 +54,14 @@ describe('Store', function() {
     });
 
     it('can not cache', function(done) {
-    var uncached_store = new Store('bucket');
-    var amazon = nock('https://bucket.s3.amazonaws.com:443')
-      .get('/boop')
-      .times(2)
-      .reply(200, 'bleep');
+      var uncached_store = new Store('bucket', config.s3_origin);
+
+      for (let i = 0; i < 2; i++) {
+        this.s3.mock({
+          req: { method: 'GET', pathname: '/bucket/boop' },
+          res: res.text('bleep')
+        });
+      }
 
       uncached_store.get('boop').then(function(res) {
         res.should.be.exactly('bleep');
@@ -50,7 +69,6 @@ describe('Store', function() {
         return uncached_store.get('boop');
       }).then(function(res) {
         res.should.be.exactly('bleep');
-        amazon.done();
         done()
       }, done).done();
     });
@@ -58,12 +76,11 @@ describe('Store', function() {
 
   describe('put()', function() {
     it('puts something', function(done) {
-      var amazon = nock('https://bucket.s3.amazonaws.com:443')
-        .put('/boop', 'bleep')
-        .reply(200);
+      this.s3.mock({
+        req: { method: 'PUT', pathname: '/bucket/boop', body: 'bleep' }
+      });
 
       this.store.put('boop', 'bleep').then(function() {
-        amazon.done();
         done();
       }, done).done();
     });

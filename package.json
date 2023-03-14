@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "description": "A build & deploy server for static websites backed by dropbox and served by S3",
   "repository": "https://github.com/griffinmyers/pony-express",
-  "engines": { "node" : "16.19.0" },
+  "engines": {
+    "node": "16.19.0"
+  },
   "scripts": {
     "start": "node app.js",
     "lint": "eslint . --ext .js",
@@ -35,15 +37,15 @@
     "winston": "2.1.1"
   },
   "devDependencies": {
-    "eslint": "2.2.0",
+    "eslint": "^8.36.0",
     "istanbul": "0.4.2",
     "metalsmith-serve": "0.0.3",
     "metalsmith-watch": "0.2.0",
     "mocha": "2.4.5",
     "mock-fs": "5.2.0",
-    "nock": "13.3.0",
     "should": "5.2.0",
-    "supertest": "0.15.0"
+    "supertest": "0.15.0",
+    "wirepig": "^0.1.0"
   },
   "license": "MIT"
 }

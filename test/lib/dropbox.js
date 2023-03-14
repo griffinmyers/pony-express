@@ -1,17 +1,39 @@
+var url = require('url');
 var should = require('should');
-var nock = require('nock');
 var mockfs = require('mock-fs');
+var config = require('../../config');
 var Dropbox = require('../../lib/dropbox.js');
 var fs = require('fs');
 var Q = require('q');
+var { http, helpers: { res, match } } = require('wirepig');
+
+const port = (u) => parseInt(url.parse(u).port);
 
 describe('Dropbox', function() {
-
-  beforeEach(function() {
-    this.dropbox = new Dropbox('access_key', 'local');
+  before(async function() {
+    this.dropbox_api = await http({ port: port(config.dropbox_api_origin) });
+    this.dropbox_content = await http({ port: port(config.dropbox_content_origin) });
   });
 
-  afterEach(mockfs.restore);
+  beforeEach(function() {
+    this.dropbox = new Dropbox(
+      'access_key',
+      'local',
+      config.dropbox_api_origin,
+      config.dropbox_content_origin
+    );
+  });
+
+  afterEach(function() {
+    this.dropbox_api.reset();
+    this.dropbox_content.reset();
+    mockfs.restore();
+  });
+
+  after(async function() {
+    await this.dropbox_api.teardown();
+    await this.dropbox_content.teardown();
+  })
 
   describe('cursor()', function() {
 
@@ -145,62 +167,70 @@ describe('Dropbox', function() {
   describe('fetch_file()', function() {
 
     it('makes a network request for a file', function(done) {
-      var fetch = nock('https://content.dropboxapi.com:443', {
-          reqheaders: {'Dropbox-API-Arg': '{"path":"/albums/1989/style.mp3"}'}
-        })
-        .get('/2/files/download')
-        .reply(200, 'bitsbitsbits');
+      this.dropbox_content.mock({
+        req: {
+          method: 'GET',
+          pathname: '/2/files/download',
+          headers: {'Dropbox-API-Arg': '{"path":"/albums/1989/style.mp3"}'}
+        },
+        res: res.text('bitsbitsbits')
+      });
 
       this.dropbox.fetch_file('/albums/1989/style.mp3').then(function(res) {
         res.toString().should.be.exactly('bitsbitsbits');
-        fetch.done();
         done();
       }, done).done();
     });
 
     it('handles HTTP errors', function(done) {
-      var fetch = nock('https://content.dropboxapi.com:443', {
-          reqheaders: {'Dropbox-API-Arg': '{"path":"/albums/1989/style.mp3"}'}
-        })
-        .get('/2/files/download')
-        .reply(500);
+      this.dropbox_content.mock({
+        req: {
+          method: 'GET',
+          pathname: '/2/files/download',
+          headers: {'Dropbox-API-Arg': '{"path":"/albums/1989/style.mp3"}'}
+        },
+        res: { statusCode: 500 }
+      });
 
       this.dropbox.fetch_file('/albums/1989/style.mp3').then(function(res) {
         done('Should have failed.');
       }, function(reason) {
-        fetch.done();
         done();
       }).done();
     });
 
     it('handles application level errors', function(done) {
-      var fetch = nock('https://content.dropboxapi.com:443', {
-          reqheaders: {'Dropbox-API-Arg': '{"path":"/albums/1989/style.mp3"}'}
-        })
-        .get('/2/files/download')
-        .reply(200, {error: 'doh'});
+      this.dropbox_content.mock({
+        req: {
+          method: 'GET',
+          pathname: '/2/files/download',
+          headers: {'Dropbox-API-Arg': '{"path":"/albums/1989/style.mp3"}'}
+        },
+        res: res.json({error: 'doh'})
+      });
 
       this.dropbox.fetch_file('/albums/1989/style.mp3').then(function() {
         done('Should have failed.');
       }, function(reason) {
         reason.message.should.be.exactly('doh /2/files/download');
-        fetch.done();
         done();
       }).done();
     });
 
     it('handles network errors', function(done) {
-      var fetch = nock('https://content.dropboxapi.com:443', {
-          reqheaders: {'Dropbox-API-Arg': '{"path":"/albums/1989/style.mp3"}'}
-        })
-        .get('/2/files/download')
-        .replyWithError('Network Failure');
+      this.dropbox_content.mock({
+        req: {
+          method: 'GET',
+          pathname: '/2/files/download',
+          headers: {'Dropbox-API-Arg': '{"path":"/albums/1989/style.mp3"}'}
+        },
+        res: { destroySocket: true }
+      });
 
       this.dropbox.fetch_file('/albums/1989/style.mp3').then(function() {
         done('Should have failed.');
       }, function(reason) {
-        reason.message.should.be.exactly('Network Failure');
-        fetch.done();
+        reason.message.should.be.exactly('socket hang up');
         done();
       }).done();
     });
@@ -210,13 +240,17 @@ describe('Dropbox', function() {
   describe('list_folder()', function() {
 
     it('makes a list_folder request with an empty cursor', function(done) {
-      var list_folder = nock('https://api.dropboxapi.com:443')
-        .post('/2/files/list_folder', {path: '', recursive: true})
-        .reply(200, {has_more: false, entries: [1, 2, 3]});
+      this.dropbox_api.mock({
+        req: {
+          method: 'POST',
+          pathname: '/2/files/list_folder',
+          body: match.json({path: '', recursive: true})
+        },
+        res: res.json({has_more: false, entries: [1, 2, 3]})
+      });
 
       this.dropbox.list_folder().then(function(res) {
         res.entries.should.have.length(3);
-        list_folder.done();
         done();
       }, done).done();
     });
@@ -224,18 +258,26 @@ describe('Dropbox', function() {
     it('will retry given a cursor error by reseting and trying without a cursor', function(done) {
       mockfs({'local/albums/1989/out-of-the-woods.mp3': '2'});
 
-      var list_folder_fail = nock('https://api.dropboxapi.com:443')
-        .post('/2/files/list_folder/continue', {cursor: '1989'})
-        .reply(401, {error: 'bloop'});
+      this.dropbox_api.mock({
+        req: {
+          method: 'POST',
+          pathname: '/2/files/list_folder/continue',
+          body: match.json({cursor: '1989'})
+        },
+        res: res.json({error: 'bloop'}, { statusCode: 401 })
+      });
 
-      var list_folder = nock('https://api.dropboxapi.com:443')
-        .post('/2/files/list_folder', {path: '', recursive: true})
-        .reply(200, {has_more: false, entries: [1, 2, 3]});
+      this.dropbox_api.mock({
+        req: {
+          method: 'POST',
+          pathname: '/2/files/list_folder',
+          body: match.json({path: '', recursive: true})
+        },
+        res: res.json({has_more: false, entries: [1, 2, 3]})
+      });
 
       this.dropbox.list_folder('1989').then(function(res) {
         res.entries.should.have.length(3);
-        list_folder_fail.done();
-        list_folder.done();
         fs.readdir('local', function(err, files) {
           if(err) { done(err); return; }
           files.should.have.length(0);
@@ -246,61 +288,85 @@ describe('Dropbox', function() {
     });
 
     it('handles application level errors', function(done) {
-      var list_folder = nock('https://api.dropboxapi.com:443')
-        .post('/2/files/list_folder')
-        .reply(200, {error: {'.tag': 'bloop'}});
+      this.dropbox_api.mock({
+        req: {
+          method: 'POST',
+          pathname: '/2/files/list_folder',
+          body: match.json({path: '', recursive: true}),
+        },
+        res: res.json({error: {'.tag': 'bloop'}})
+      });
 
       this.dropbox.list_folder().then(function() {
         done('Should have failed.');
       }, function(reason) {
-        list_folder.done();
         done();
       }).done();
     });
 
     it('handles non-json responses as errors', function(done) {
-      var list_folder = nock('https://api.dropboxapi.com:443')
-        .post('/2/files/list_folder')
-        .reply(200, 'huh?');
+      this.dropbox_api.mock({
+        req: {
+          method: 'POST',
+          pathname: '/2/files/list_folder',
+          body: match.json({path: '', recursive: true}),
+        },
+        res: res.text('huh?')
+      });
 
       this.dropbox.list_folder().then(function() {
         done('Should have failed.');
       }, function(reason) {
-        list_folder.done();
         done();
       }).done();
     });
 
     it('makes a list_folder request with a cursor', function(done) {
-      var list_folder = nock('https://api.dropboxapi.com:443')
-        .post('/2/files/list_folder/continue', {cursor: '1989'})
-        .reply(200, {has_more: false, entries: [1, 2, 3]});
+      this.dropbox_api.mock({
+        req: {
+          method: 'POST',
+          pathname: '/2/files/list_folder/continue',
+          body: match.json({cursor: '1989'}),
+        },
+        res: res.json({has_more: false, entries: [1, 2, 3]})
+      });
 
       this.dropbox.list_folder('1989').then(function(res) {
         res.entries.should.have.length(3);
-        list_folder.done();
         done();
       }, done).done();
     });
 
     it('unpages a many list_folder requests', function(done) {
-      var page1 = nock('https://api.dropboxapi.com:443')
-        .post('/2/files/list_folder', {path: '', recursive: true})
-        .reply(200, {has_more: true, entries: [1, 2, 3], cursor: '1'});
+      this.dropbox_api.mock({
+        req: {
+          method: 'POST',
+          pathname: '/2/files/list_folder',
+          body: match.json({path: '', recursive: true}),
+        },
+        res: res.json({has_more: true, entries: [1, 2, 3], cursor: '1'})
+      });
 
-      var page2 = nock('https://api.dropboxapi.com:443')
-        .post('/2/files/list_folder/continue', {cursor: '1'})
-        .reply(200, {has_more: true, entries: [4, 5], 'cursor': '2'});
+      this.dropbox_api.mock({
+        req: {
+          method: 'POST',
+          pathname: '/2/files/list_folder/continue',
+          body: match.json({cursor: '1'}),
+        },
+        res: res.json({has_more: true, entries: [4, 5], 'cursor': '2'})
+      });
 
-      var page3 = nock('https://api.dropboxapi.com:443')
-        .post('/2/files/list_folder/continue', {cursor: '2'})
-        .reply(200, {has_more: false, entries: [6]});
+      this.dropbox_api.mock({
+        req: {
+          method: 'POST',
+          pathname: '/2/files/list_folder/continue',
+          body: match.json({cursor: '2'}),
+        },
+        res: res.json({has_more: false, entries: [6]})
+      });
 
       this.dropbox.list_folder().then(function(res) {
         res.entries.should.have.length(6);
-        page1.done();
-        page2.done();
-        page3.done();
         done();
       }, done).done();
     });
@@ -314,17 +380,19 @@ describe('Dropbox', function() {
     });
 
     it('pulls a file off the network and saves it to disk', function(done) {
-      var sync = nock('https://content.dropboxapi.com:443', {
-          reqheaders: {'Dropbox-API-Arg': '{"path":"/albums/1989/style.mp3"}'}
-        })
-        .get('/2/files/download')
-        .reply(200, 'we never go out of style');
+      this.dropbox_content.mock({
+        req: {
+          method: 'GET',
+          pathname: '/2/files/download',
+          headers: {'Dropbox-API-Arg': '{"path":"/albums/1989/style.mp3"}'}
+        },
+        res: res.text('we never go out of style')
+      });
 
       this.dropbox.sync_file({path_lower: '/albums/1989/style.mp3'}).then(function() {
         fs.readFile('local/albums/1989/style.mp3', function(err, content) {
           if(err) { done(err); return; }
           content.toString().should.be.exactly('we never go out of style');
-          sync.done();
           done();
         })
       }, done).done();
@@ -388,17 +456,23 @@ describe('Dropbox', function() {
     });
 
     it('syncs a list of entries', function(done) {
-      var nude = nock('https://content.dropboxapi.com:443', {
-          reqheaders: {'Dropbox-API-Arg': '{"path":"/albums/radiohead/in-rainbows/nude.mp3"}'}
-        })
-        .get('/2/files/download')
-        .reply(200, 'dont get any big ideas');
+      this.dropbox_content.mock({
+        req: {
+          method: 'GET',
+          pathname: '/2/files/download',
+          headers: {'Dropbox-API-Arg': '{"path":"/albums/radiohead/in-rainbows/nude.mp3"}'}
+        },
+        res: res.text('dont get any big ideas')
+      });
 
-      var trouble = nock('https://content.dropboxapi.com:443', {
-          reqheaders: {'Dropbox-API-Arg': '{"path":"/albums/taylor-swift/red/trouble.mp3"}'}
-        })
-        .get('/2/files/download')
-        .reply(200, 'i knew you were trouble');
+      this.dropbox_content.mock({
+        req: {
+          method: 'GET',
+          pathname: '/2/files/download',
+          headers: {'Dropbox-API-Arg': '{"path":"/albums/taylor-swift/red/trouble.mp3"}'}
+        },
+        res: res.text('i knew you were trouble')
+      });
 
       this.dropbox.sync_entries({cursor: '1989', entries: [
         {path_lower: '/albums/radiohead/in-rainbows/nude.mp3', '.tag': 'file'},
@@ -424,14 +498,12 @@ describe('Dropbox', function() {
         function assertRadiohead(err, content) {
           if(err) { done(err); return; }
           content.toString().should.be.exactly('dont get any big ideas')
-          nude.done();
           fs.readFile('local/albums/taylor-swift/red/trouble.mp3', assertTaylor);
         }
 
         function assertTaylor(err, content) {
           if (err) { done(err); }
           content.toString().should.be.exactly('i knew you were trouble')
-          trouble.done();
           done();
         }
 
@@ -449,36 +521,59 @@ describe('Dropbox', function() {
     });
 
     it('syncs', function(done) {
-
-      var page1 = nock('https://api.dropboxapi.com:443')
-        .post('/2/files/list_folder', {path: '', recursive: true})
-        .reply(200, {cursor: '1990', has_more: true, entries: [
-          {path_lower: '/albums/radiohead/in-rainbows/nude.mp3', '.tag': 'file'},
-          {path_lower: '/albums/1989', '.tag': 'deleted'},
-          {path_lower: '/albums/radiohead/in-rainbows', '.tag': 'folder'},
-          {path_lower: '/albums/radiohead/amnesiac', '.tag': 'folder'}
-        ]});
-
-      var page2 = nock('https://api.dropboxapi.com:443')
-        .post('/2/files/list_folder/continue', {cursor: '1990'})
-        .reply(200, {cursor: '1991', has_more: false, entries: [
-          {path_lower: '/albums/grizzly-bear/veckatimest', '.tag': 'folder'},
-          {path_lower: '/albums/taylor-swift/red', '.tag': 'folder'},
-          {path_lower: '/albums/1989/style.mp3', '.tag': 'deleted'},
-          {path_lower: '/albums/taylor-swift/red/trouble.mp3', '.tag': 'file'}
-        ]});
-
-      var nude = nock('https://content.dropboxapi.com:443', {
-          reqheaders: {'Dropbox-API-Arg': '{"path":"/albums/radiohead/in-rainbows/nude.mp3"}'}
+      this.dropbox_api.mock({
+        req: {
+          method: 'POST',
+          pathname: '/2/files/list_folder',
+          body: match.json({path: '', recursive: true})
+        },
+        res: res.json({
+          cursor: '1990',
+          has_more: true,
+          entries: [
+            {path_lower: '/albums/radiohead/in-rainbows/nude.mp3', '.tag': 'file'},
+            {path_lower: '/albums/1989', '.tag': 'deleted'},
+            {path_lower: '/albums/radiohead/in-rainbows', '.tag': 'folder'},
+            {path_lower: '/albums/radiohead/amnesiac', '.tag': 'folder'}
+          ]
         })
-        .get('/2/files/download')
-        .reply(200, 'dont get any big ideas');
+      });
 
-      var trouble = nock('https://content.dropboxapi.com:443', {
-          reqheaders: {'Dropbox-API-Arg': '{"path":"/albums/taylor-swift/red/trouble.mp3"}'}
+      this.dropbox_api.mock({
+        req: {
+          method: 'POST',
+          pathname: '/2/files/list_folder/continue',
+          body: match.json({cursor: '1990'})
+        },
+        res: res.json({
+          cursor: '1991',
+          has_more: false,
+          entries: [
+            {path_lower: '/albums/grizzly-bear/veckatimest', '.tag': 'folder'},
+            {path_lower: '/albums/taylor-swift/red', '.tag': 'folder'},
+            {path_lower: '/albums/1989/style.mp3', '.tag': 'deleted'},
+            {path_lower: '/albums/taylor-swift/red/trouble.mp3', '.tag': 'file'}
+          ]
         })
-        .get('/2/files/download')
-        .reply(200, 'i knew you were trouble');
+      });
+
+      this.dropbox_content.mock({
+        req: {
+          method: 'GET',
+          pathname: '/2/files/download',
+          headers: {'Dropbox-API-Arg': '{"path":"/albums/radiohead/in-rainbows/nude.mp3"}'}
+        },
+        res: res.text('dont get any big ideas')
+      });
+
+      this.dropbox_content.mock({
+        req: {
+          method: 'GET',
+          pathname: '/2/files/download',
+          headers: {'Dropbox-API-Arg': '{"path":"/albums/taylor-swift/red/trouble.mp3"}'}
+        },
+        res: res.text('i knew you were trouble')
+      });
 
       this.dropbox.sync().then(function() {
         fs.readFile('local/.pony-token', function(err, content) {
@@ -486,30 +581,27 @@ describe('Dropbox', function() {
           content.toString().should.be.exactly('1991');
           done();
         });
-
-        page1.done();
-        page2.done();
-        nude.done();
-        trouble.done();
       }, done).done();
     });
 
     it('deletes the cursor if anything breaks', function(done) {
-
-      var list_folder = nock('https://api.dropboxapi.com:443')
-        .post('/2/files/list_folder')
-        .replyWithError('doh');
+      this.dropbox_api.mock({
+        req: {
+          method: 'POST',
+          pathname: '/2/files/list_folder',
+        },
+        res: { destroySocket: true }
+      });
 
       this.dropbox.sync().then(function() {
         done('Should not have resolved.');
       }, function(reason) {
         fs.readFile('local/.pony-token', function(err) {
-          reason.message.should.be.exactly('doh');
+          reason.message.should.be.exactly('socket hang up');
           if(err) { done(); return; }
           done('Cursor should have been deleted.');
         });
 
-        list_folder.done();
       }).done();
     });
 
