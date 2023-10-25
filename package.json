@@ -4,7 +4,7 @@
   "description": "A build & deploy server for static websites backed by dropbox and served by S3",
   "repository": "https://github.com/griffinmyers/pony-express",
   "engines": {
-    "node": "16.19.0"
+    "node": "18.7.0"
   },
   "scripts": {
     "start": "node app.js",
